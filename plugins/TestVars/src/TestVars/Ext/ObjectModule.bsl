@@ -10,109 +10,109 @@
 
 // todo: проверять два присваивания одной переменной подряд
 
-Var Nodes;
-Var Result;
+Перем Узлы;
+Перем Результат;
 
-Var Vars, Params;
+Перем Переменные, Параметры;
 
-Procedure Init(BSLParser) Export
-	Nodes = BSLParser.Nodes();
-	Result = New Array;
-	Vars = New Map;
-	Params = New Map;
-EndProcedure // Init() 
+Процедура Инициализировать(ПарсерBSL) Экспорт
+	Узлы = ПарсерBSL.Узлы();
+	Результат = Новый Массив;
+	Переменные = Новый Соответствие;
+	Параметры = Новый Соответствие;
+КонецПроцедуры // Инициализировать() 
 
-Function Result() Export
-	Return StrConcat(Result, Chars.LF);
-EndFunction // Result()
+Функция Результат() Экспорт
+	Возврат СтрСоединить(Результат, Символы.ПС);
+КонецФункции // Результат()
 
-Function Interface() Export
-	Var Interface;
-	Interface = New Array;
-	Interface.Add("AfterVisitAssignStmt");
-	Interface.Add("VisitIdentExpr");
-	Interface.Add("VisitMethodDecl");
-	Interface.Add("AfterVisitMethodDecl");
-	Return Interface;
-EndFunction // Interface() 
+Функция Интерфейс() Экспорт
+	Перем Интерфейс;
+	Интерфейс = Новый Массив;
+	Интерфейс.Добавить("ПослеПосещенияИнструкцииПрисваивания");
+	Интерфейс.Добавить("ПосетитьВыражениеИдентификатор");
+	Интерфейс.Добавить("ПосетитьОбъявлениеМетода");
+	Интерфейс.Добавить("ПослеПосещенияОбъявленияМетода");
+	Возврат Интерфейс;
+КонецФункции // Интерфейс() 
 
-Procedure AfterVisitAssignStmt(AssignStmt, Stack, Counters) Export
-	Var Name, Decl, Operation; 
-	If AssignStmt.Left.Args <> Undefined Or AssignStmt.Left.Tail.Count() > 0 Then
-		Return;
-	EndIf;
-	Name = AssignStmt.Left.Head.Name; 
-	Operation = Vars[Name];
-	If Operation <> Undefined Then
-		If Operation = "GetInLoop" Then
-			Vars[Name] = "Get";
-		Else
-			Vars[Name] = "Set";
-		EndIf;
-		Return;
-	EndIf; 	
-	Decl = AssignStmt.Left.Head.Decl;
-	Operation = Params[Decl];	
-	If Operation <> Undefined Then
-		If Operation = "GetInLoop" Then
-			Params[Decl] = "Get";
-		Else
-			Params[Decl] = "Set";
-		EndIf; 
-	EndIf; 
-EndProcedure // AfterVisitAssignStmt()
+Процедура ПослеПосещенияИнструкцииПрисваивания(ИнструкцияПрисваивания, Стек, Счетчики) Экспорт
+	Перем Имя, Объявление, Операция; 
+	Если ИнструкцияПрисваивания.Левый.Аргументы <> Неопределено Или ИнструкцияПрисваивания.Левый.Хвост.Количество() > 0 Тогда
+		Возврат;
+	КонецЕсли;
+	Имя = ИнструкцияПрисваивания.Левый.Голова.Имя; 
+	Операция = Переменные[Имя];
+	Если Операция <> Неопределено Тогда
+		Если Операция = "GetInLoop" Тогда
+			Переменные[Имя] = "Get";
+		Иначе
+			Переменные[Имя] = "Set";
+		КонецЕсли;
+		Возврат;
+	КонецЕсли; 	
+	Объявление = ИнструкцияПрисваивания.Левый.Голова.Объявление;
+	Операция = Параметры[Объявление];	
+	Если Операция <> Неопределено Тогда
+		Если Операция = "GetInLoop" Тогда
+			Параметры[Объявление] = "Get";
+		Иначе
+			Параметры[Объявление] = "Set";
+		КонецЕсли; 
+	КонецЕсли; 
+КонецПроцедуры // ПослеПосещенияИнструкцииПрисваивания()
 
-Procedure VisitIdentExpr(IdentExpr, Stack, Counters) Export
-	Var Name, Decl, Operation;
-	If IdentExpr.Tail.Count() = 0
-		And Stack.Parent.Type = Nodes.AssignStmt
-		And Stack.Parent.Left = IdentExpr Then
-		Return;
-	EndIf;
-	If Counters.WhileStmt + Counters.ForStmt + Counters.ForEachStmt > 0 Then
-		Operation = "GetInLoop";
-	Else
-		Operation = "Get";
-	EndIf; 
-	Name = IdentExpr.Head.Name;
-	Decl = IdentExpr.Head.Decl;
-	If Vars[Name] <> Undefined Then
-		Vars[Name] = Operation;
-	ElsIf Params[Decl] <> Undefined Then
-		Params[Decl] = Operation;	
-	EndIf; 
-EndProcedure // VisitIdentExpr()
+Процедура ПосетитьВыражениеИдентификатор(ВыражениеИдентификатор, Стек, Счетчики) Экспорт
+	Перем Имя, Объявление, Операция;
+	Если ВыражениеИдентификатор.Хвост.Количество() = 0
+		И Стек.Родитель.Тип = Узлы.ИнструкцияПрисваивания
+		И Стек.Родитель.Левый = ВыражениеИдентификатор Тогда
+		Возврат;
+	КонецЕсли;
+	Если Счетчики.ИнструкцияПока + Счетчики.ИнструкцияДля + Счетчики.ИнструкцияДляКаждого > 0 Тогда
+		Операция = "GetInLoop";
+	Иначе
+		Операция = "Get";
+	КонецЕсли; 
+	Имя = ВыражениеИдентификатор.Голова.Имя;
+	Объявление = ВыражениеИдентификатор.Голова.Объявление;
+	Если Переменные[Имя] <> Неопределено Тогда
+		Переменные[Имя] = Операция;
+	ИначеЕсли Параметры[Объявление] <> Неопределено Тогда
+		Параметры[Объявление] = Операция;	
+	КонецЕсли; 
+КонецПроцедуры // ПосетитьВыражениеИдентификатор()
 
-Procedure VisitMethodDecl(MethodDecl, Stack, Counters) Export
-	Vars = New Map;
-	Params = New Map;		
-	For Each Param In MethodDecl.Sign.Params Do
-		Params[Param] = "Get";
-		//Params[Param] = "Nil"; <- чтобы чекать все параметры (в формах адъ)
-	EndDo;
-	For Each VarLocDecl In MethodDecl.Vars Do
-		Vars[VarLocDecl.Name] = "Set";
-	EndDo;
-	For Each Object In MethodDecl.Auto Do
-		Vars[Object.Name] = "Set";
-	EndDo;
-EndProcedure // VisitMethodDecl()
+Процедура ПосетитьОбъявлениеМетода(ОбъявлениеМетода, Стек, Счетчики) Экспорт
+	Переменные = Новый Соответствие;
+	Параметры = Новый Соответствие;		
+	Для Каждого Параметр Из ОбъявлениеМетода.Сигнатура.Параметры Цикл
+		Параметры[Параметр] = "Get";
+		//Параметры[Параметр] = "Nil"; <- чтобы чекать все параметры (в формах адъ)
+	КонецЦикла;
+	Для Каждого ОбъявлениеЛокальнойПеременной Из ОбъявлениеМетода.Переменные Цикл
+		Переменные[ОбъявлениеЛокальнойПеременной.Имя] = "Set";
+	КонецЦикла;
+	Для Каждого Объект Из ОбъявлениеМетода.Авто Цикл
+		Переменные[Объект.Имя] = "Set";
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеМетода()
 
-Procedure AfterVisitMethodDecl(MethodDecl, Stack, Counters) Export
-	Var Method;
-	If MethodDecl.Sign.Type = Nodes.FuncSign Then
-		Method = "Функция";
-	Else
-		Method = "Процедура";
-	EndIf; 
-	For Each Item In Vars Do
-		If Not StrStartsWith(Item.Value, "Get") Then
-			Result.Add(StrTemplate("%1 `%2()` содержит неиспользуемую переменную `%3`", Method, MethodDecl.Sign.Name, Item.Key));
-		EndIf; 
-	EndDo;
-	For Each Item In Params Do
-		If Item.Value = "Nil" Or Item.Value = "Set" And Item.Key.ByVal Then
-			Result.Add(StrTemplate("%1 `%2()` содержит неиспользуемый параметр `%3`", Method, MethodDecl.Sign.Name, Item.Key.Name));
-		EndIf; 
-	EndDo;
-EndProcedure // AfterVisitMethodDecl()
+Процедура ПослеПосещенияОбъявленияМетода(ОбъявлениеМетода, Стек, Счетчики) Экспорт
+	Перем Метод;
+	Если ОбъявлениеМетода.Сигнатура.Тип = Узлы.СигнатураФункции Тогда
+		Метод = "Функция";
+	Иначе
+		Метод = "Процедура";
+	КонецЕсли; 
+	Для Каждого Элемент Из Переменные Цикл
+		Если Not СтрНачинаетсяС(Элемент.Значение, "Get") Тогда
+			Результат.Добавить(СтрШаблон("%1 `%2()` содержит неиспользуемую переменную `%3`", Метод, ОбъявлениеМетода.Сигнатура.Имя, Элемент.Ключ));
+		КонецЕсли; 
+	КонецЦикла;
+	Для Каждого Элемент Из Параметры Цикл
+		Если Элемент.Значение = "Nil" Или Элемент.Значение = "Set" И Элемент.Ключ.ПоЗначению Тогда
+			Результат.Добавить(СтрШаблон("%1 `%2()` содержит неиспользуемый параметр `%3`", Метод, ОбъявлениеМетода.Сигнатура.Имя, Элемент.Ключ.Имя));
+		КонецЕсли; 
+	КонецЦикла;
+КонецПроцедуры // ПослеПосещенияОбъявленияМетода()

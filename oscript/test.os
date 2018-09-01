@@ -1,16 +1,16 @@
 
-AttachScript("..\src\BSLParser\Ext\ObjectModule.bsl", "BSLParser");
-AttachScript("..\plugins\TestVars\src\TestVars\Ext\ObjectModule.bsl", "PluginTestVars");
+ПодключитьСценарий("..\src\BSLParser\Ext\ObjectModule.bsl", "ПарсерBSL");
+ПодключитьСценарий("..\plugins\TestVars\src\TestVars\Ext\ObjectModule.bsl", "ПлагинТестПеременных");
 
-TextReader = New TextReader("..\src\BSLParser\Ext\ObjectModule.bsl");
-Source = TextReader.Read();
+ЧтениеТекста = New ЧтениеТекста("..\src\BSLParser\Ext\ObjectModule.bsl");
+Исходник = ЧтениеТекста.Прочитать();
 
-BSLParser = New BSLParser;
-BSLParser.Location = False;
-Module = BSLParser.ParseModule(Source);
+ПарсерBSL = New ПарсерBSL;
+ПарсерBSL.ПоложениеУзлаВАСТ = Ложь;
+Модуль = ПарсерBSL.РазобратьМодуль(Исходник);
 
-PluginTestVars = New PluginTestVars;
-BSLParser.HookUp(PluginTestVars);
-BSLParser.VisitModule(Module);
+ПлагинТестПеременных = New ПлагинТестПеременных;
+ПарсерBSL.Подключить(ПлагинТестПеременных);
+ПарсерBSL.ПосетитьМодуль(Модуль);
 
-Message(PluginTestVars.Result());
+Сообщить(ПлагинТестПеременных.Результат());
