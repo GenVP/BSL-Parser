@@ -1,18 +1,18 @@
 ﻿
-// Генератор технической документации по парсеру
+ // Генератор технической документации по парсеру
 
-Var Tokens, Nodes, Directives, PrepInstructions;
-Var Region, SubRegion, RegionLevel;
-Var Comments;
-Var Result;
+Перем Токены, Узлы, Директивы, ИнструкцииПрепроцессора;
+Перем Область, Подобласть, УровеньОбласти;
+Перем Комментарии;
+Перем Результат;
 
-Procedure Init(BSLParser) Export
-	Tokens = BSLParser.Tokens();
-	Nodes = BSLParser.Nodes();
-	Directives = BSLParser.Directives();
-	PrepInstructions = BSLParser.PrepInstructions();
-	Result = New Array;
-	Result.Add(
+Процедура Инициализировать(Парсер) Экспорт
+	Токены = Парсер.Токены();
+	Узлы = Парсер.Узлы();
+	Директивы = Парсер.Директивы();
+	ИнструкцииПрепроцессора = Парсер.ИнструкцииПрепроцессора();
+	Результат = Новый Массив;
+	Результат.Добавить(
 		"<!DOCTYPE html>
 		|<html>
 		|<head>
@@ -24,331 +24,331 @@ Procedure Init(BSLParser) Export
 		|<header>
 		|<h1>BSL-Parser</h1>
 		|</header>
-		|<h1>Examples of using the parser</h1>
+		|<h1>Примеры использования парсера</h1>
 		|<pre>
 		|
 		|// 1C:Enterprise 8.3.11
 		|
-		|BSLParser = ExternalDataProcessors.Create(BSLParserPath, False);
-		|Plugins = New Array;
+		|Парсер = ВнешниеОбработки.Создать(ПарсерПуть, False);
+		|Плагины = Новый Массив;
 		|
-		|Plugin1 = ExternalDataProcessors.Create(PluginPath1, False);
-		|Plugins.Add(Plugin1);
+		|Плагин1 = ВнешниеОбработки.Создать(ПлагинПуть1, False);
+		|Плагины.Добавить(Плагин1);
 		|
-		|Plugin2 = ExternalDataProcessors.Create(PluginPath2, False);
-		|Plugins.Add(Plugin2);
+		|Плагин2 = ВнешниеОбработки.Создать(ПлагинПуть2, False);
+		|Плагины.Добавить(Плагин2);
 		|
-		|Module = BSLParser.ParseModule(Source.GetText());
-		|BSLParser.HookUp(Plugins);
-		|BSLParser.VisitModule(Module);
+		|Модуль = Парсер.РазобратьМодуль(Исходник.ПолучитьТекст());
+		|Парсер.Подключить(Плагины);
+		|Парсер.ПосетитьМодуль(Модуль);
 		|
-		|Message(Plugin1.Result());
-		|Message(Plugin2.Result());
+		|Сообщить(Плагин1.Result());
+		|Сообщить(Плагин2.Result());
 		|
 		|// OneScript
 		|
-		|AttachScript(""..\src\BSLParser\Ext\ObjectModule.bsl"", ""BSLParser"");
-		|AttachScript(""..\plugins\TestVars\src\TestVars\Ext\ObjectModule.bsl"", ""PluginTestVars"");
+		|AttachScript(""..\src\BSLParser\Ext\ObjectМодуль.bsl"", ""Парсер"");
+		|AttachScript(""..\plugins\TestVars\src\TestVars\Ext\ObjectМодуль.bsl"", ""ПлагинПроверкаИспользованияПеременных"");
 		|
-		|TextReader = New TextReader(""..\src\BSLParser\Ext\ObjectModule.bsl"");
-		|Source = TextReader.Read();
+		|ЧтениеТекста = Новый ЧтениеТекста(""..\src\BSLParser\Ext\ObjectМодуль.bsl"");
+		|Исходник = ЧтениеТекста.Прочитать();
 		|
-		|BSLParser = New BSLParser;
-		|BSLParser.Location = False;
-		|Module = BSLParser.ParseModule(Source);
+		|Парсер = Новый BSLParser;
+		|Парсер.ПоложениеУзлаВАСТ = Ложь;
+		|Модуль = BSLParser.РазобратьМодуль(Исходник);
 		|
-		|PluginTestVars = New PluginTestVars;
-		|BSLParser.HookUp(PluginTestVars);
-		|BSLParser.VisitModule(Module);
+		|ПлагинПроверкаИспользованияПеременных = Новый ПлагинПроверкаИспользованияПеременных;
+		|Парсер.Подключить(ПлагинПроверкаИспользованияПеременных);
+		|Парсер.ПосетитьМодуль(Модуль);
 		|
-		|Message(PluginTestVars.Result());
+		|Сообщить(ПлагинПроверкаИспользованияПеременных.Результат());
 		|</pre>
-		|<h1>Plugin Template</h1>
+		|<h1>Шаблон плагина</h1>
 		|<pre>
-		|Var Tokens, Nodes, Directives, PrepInstructions, PrepSymbols;
-		|Var Result;
+		|Перем Токены, Узлы, Директивы, ИнструкцииПрепроцессора, СимволыПрепроцессора;
+		|Перем Результат;
 		|
-		|Procedure Init(BSLParser) Export
-		|	Tokens = BSLParser.Tokens();
-		|	Nodes = BSLParser.Nodes();
-		|	Directives = BSLParser.Directives();
-		|	PrepInstructions = BSLParser.PrepInstructions();
-		|	PrepSymbols = BSLParser.PrepSymbols();
-		|	Result = New Array;
-		|EndProcedure // Init()
+		|Процедура Инициализировать(Парсер) Экспорт
+		|	Токены = Парсер.Токены();
+		|	Узлы = Парсер.Узлы();
+		|	Директивы = Парсер.Директивы();
+		|	ИнструкцииПрепроцессора = Парсер.ИнструкцииПрепроцессора();
+		|	СимволыПрепроцессора = Парсер.СимволыПрепроцессора();
+		|	Результат = Новый Массив;
+		|КонецПроцедуры // Инициализировать()
 		|
-		|Function Result() Export
+		|Функция Результат() Экспорт
 		|	// ...
-		|	Return StrConcat(Result);
-		|EndFunction // Refult()
+		|	Возврат СтрСоединить(Результат);
+		|КонецФункции // Результат()
 		|
-		|Function Interface() Export
-		|	Var Interface;
-		|	Interface = New Array;
-		|	// Interface.Add(""VisitAssignStmt"");
-		|	// Interface.Add(""AfterVisitAssignStmt"");
+		|Функция Интерфейс() Экспорт
+		|	Перем Интерфейс;
+		|	Интерфейс = Новый Массив;
+		|	// Интерфейс.Добавить(""ПосетитьИнструкциюПрисваивания"");
+		|	// Интерфейс.Добавить(""ПослеПосещенияИнструкцииПрисваивания"");
 		|	...
-		|	Return Interface;
-		|EndFunction // Interface()
+		|	Возврат Интерфейс;
+		|КонецФункции // Интерфейс()
 		|
-		|#Region Hooks
+		|#Область Подписки
 		|
-		|// Procedure VisitAssignStmt(AssignStmt, Stack, Counters) Export
-		|// EndProcedure // VisitAssignStmt()
+		|// Процедура ПосетитьИнструкциюПрисваивания(ИнструкцияПрисваивания, Стек, Счетчики) Экспорт
+		|// КонецПроцедуры // ПосетитьИнструкциюПрисваивания()
 		|
-		|// Procedure AfterVisitAssignStmt(AssignStmt, Stack, Counters) Export
-		|// EndProcedure // AfterVisitAssignStmt()
+		|// Процедура ПослеПосещенияИнструкцииПрисваивания(ИнструкцияПрисваивания, Стек, Счетчики) Экспорт
+		|// КонецПроцедуры // ПослеПосещенияИнструкцииПрисваивания()
 		|
-		|#EndRegion // Hooks
+		|#КонецОбласти // Подписки
 		|</pre>"
 		""
 	);
-	RegionLevel = 0;
-EndProcedure // Init()
+	УровеньОбласти = 0;
+КонецПроцедуры // Инициализировать()
 
-Function Result() Export
-	Result.Add(
+Функция Результат() Экспорт
+	Результат.Добавить(
 		"<h2 id='#Other'>#Other</h2>
-		|<h3 id='Place'>Place</h3>
+		|<h3 id='Место'>Место</h3>
 		|<ul>
-		|	<li><strong>Pos</strong>: number</li>
-		|	<li><strong>Len</strong>: number</li>
-		|	<li><strong>BegLine</strong>: number</li>
-		|	<li><strong>EndLine</strong>: number</li>
+		|	<li><strong>Pos</strong>: число</li>
+		|	<li><strong>Len</strong>: число</li>
+		|	<li><strong>НомерСтрокиНачала</strong>: число</li>
+		|	<li><strong>EndLine</strong>: число</li>
 		|</ul>
 		|</body>
 		|</html>"
 	);
-	Result.Add("<h2 id='#Enums'>#Enums</h2>");
-	Result.Add(GenerateEnum("Directives", Directives));
-	Result.Add(GenerateEnum("PrepInstructions", PrepInstructions));
-	Result.Add(GenerateEnum("Nodes", Nodes, True));
-	Result.Add(GenerateEnum("Tokens", Tokens));
-	Return StrConcat(Result);
-EndFunction // Refult()
+	Результат.Добавить("<h2 id='#Enums'>#Enums</h2>");
+	Результат.Добавить(ВывестиПеречисление("Директивы", Директивы));
+	Результат.Добавить(ВывестиПеречисление("ИнструкцииПрепроцессора", ИнструкцииПрепроцессора));
+	Результат.Добавить(ВывестиПеречисление("Узлы", Узлы, Истина));
+	Результат.Добавить(ВывестиПеречисление("Токены", Токены));
+	Возврат СтрСоединить(Результат);
+КонецФункции // Результат()
 
-Function GenerateEnum(Name, Enum, Links = False)
-	Var Buffer;
-	Buffer = New Array;
-	Buffer.Add(StrTemplate(
-		"<h3 id='%1'>%1</h3>
-		|<ul>",
-		Name
-	));
-	EnumValues = New Structure;
-	For Each Item In Enum Do
-		EnumValues.Insert(Item.Value);
-	EndDo;
-	For Each Item In EnumValues Do
-		If Links Then
-			Buffer.Add(StrTemplate("<li>""<a href='#%1'>%1</a>""</li>" "", Item.Key));
-		Else
-			Buffer.Add(StrTemplate("<li>""%1""</li>" "", Item.Key));
-		EndIf;
-	EndDo;
-	Buffer.Add("</ul>" "");
-	Return StrConcat(Buffer);
-EndFunction // GenerateEnum()
+Функция ВывестиПеречисление(Имя, Перечисление, ВыводитьСсылки = Ложь)
+	Перем Буфер;
+	Буфер = Новый Массив;
+	Буфер.Добавить(СтрШаблон(
+			"<h3 id='%1'>%1</h3>
+			|<ul>", 
+			Имя
+		));
+	ЗначенияПеречисления = Новый Структура;
+	Для Каждого Элемент Из Перечисление Цикл 
+		ЗначенияПеречисления.Вставить(Элемент.Значение);	
+	КонецЦикла;
+	Для Каждого Элемент Из ЗначенияПеречисления Цикл 
+		Если ВыводитьСсылки Тогда 
+			Буфер.Добавить(СтрШаблон("<li>""<a href='#%1'>%1</a>""</li>" "", Элемент.Ключ));		
+		Иначе 
+			Буфер.Добавить(СтрШаблон("<li>""%1""</li>" "", Элемент.Ключ));		
+		КонецЕсли;	
+	КонецЦикла;
+	Буфер.Добавить("</ul>" "");
+	Возврат СтрСоединить(Буфер);
+КонецФункции // ВывестиПеречисление()
 
-Function Interface() Export
-	Var Interface;
-	Interface = New Array;
-	Interface.Add("VisitModule");
-	Interface.Add("VisitPrepInst");
-	Interface.Add("VisitNewExpr");
-	Return Interface;
-EndFunction // Interface()
+Функция Интерфейс() Экспорт
+	Перем Интерфейс;
+	Интерфейс = Новый Массив;
+	Интерфейс.Добавить("ПосетитьМодуль");
+	Интерфейс.Добавить("ПосетитьИнструкциюПрепроцессора");
+	Интерфейс.Добавить("ПосетитьВыражениеНовый");
+	Возврат Интерфейс;
+КонецФункции // Интерфейс()
 
-Procedure VisitModule(Module, Stack, Counters) Export
-	Comments = Module.Comments;
-EndProcedure // VisitModule
+Процедура ПосетитьМодуль(Модуль, Стек, Счетчики) Экспорт
+	Комментарии = Модуль.Комментарии;
+КонецПроцедуры // ПосетитьМодуль
 
-Procedure VisitPrepInst(PrepInst, Stack, Counters) Export
-	If PrepInst.Type = Nodes.PrepRegionInst Then
-		If RegionLevel = 0 Then
-			Region = PrepInst.Name;
-			SubRegion = "";
-			If Region = "AbstractSyntaxTree" Then
-				Result.Add("	<h1>Abstract syntax tree</h1>" "");
-			EndIf;
-		ElsIf RegionLevel = 1 Then
-			SubRegion = PrepInst.Name;
-			If Region = "AbstractSyntaxTree" Then
-				Result.Add(StrTemplate("	<h2 id='#%1'>#%1</h2>" "", SubRegion));
-			EndIf;
-		EndIf;
-		RegionLevel = RegionLevel + 1;
-	Elsif PrepInst.Type = Nodes.PrepEndRegionInst Then
-		RegionLevel = RegionLevel - 1;
-		If RegionLevel = 0 Then
-			Region = "";
-		ElsIf RegionLevel = 1 Then
-			SubRegion = "";
-		EndIf;
-	EndIf; 
-EndProcedure // VisitPrepInst()
+Процедура ПосетитьИнструкциюПрепроцессора(ИнструкцияПрепроцессора, Стек, Счетчики) Экспорт
+	Если ИнструкцияПрепроцессора.Тип = Узлы.ИнструкцияПрепроцессораОбласть Тогда 
+		Если УровеньОбласти = 0 Тогда 
+			Область = ИнструкцияПрепроцессора.Имя;
+			Подобласть = "";
+			Если Область = "АбстрактноеСинтаксическоеДерево" Тогда 
+				Результат.Добавить("	<h1>Абстрактное синтаксическое дерево</h1>" "");			
+			КонецЕсли;		
+		ИначеЕсли УровеньОбласти = 1 Тогда 
+			Подобласть = ИнструкцияПрепроцессора.Имя;
+			Если Область = "АбстрактноеСинтаксическоеДерево" Тогда 
+				Результат.Добавить(СтрШаблон("	<h2 id='#%1'>#%1</h2>" "", Подобласть));			
+			КонецЕсли;		
+		КонецЕсли;
+		УровеньОбласти = УровеньОбласти + 1;	
+	ИначеЕсли ИнструкцияПрепроцессора.Тип = Узлы.ИнструкцияПрепроцессораКонецОбласти Тогда 
+		УровеньОбласти = УровеньОбласти - 1;
+		Если УровеньОбласти = 0 Тогда 
+			Область = "";		
+		ИначеЕсли УровеньОбласти = 1 Тогда 
+			Подобласть = "";		
+		КонецЕсли;	
+	КонецЕсли;
+КонецПроцедуры // ПосетитьИнструкциюПрепроцессора()
 
-Procedure VisitNewExpr(NewExpr, Stack, Counters) Export
-
-	If Region = "AbstractSyntaxTree" Then
-
-		If NewExpr.Name = "Structure" Then
-			Tag = Comments[NewExpr.Place.BegLine];
-			If Tag <> Undefined And StrFind(Tag, "@Node") Then
-
-				DescriptionList = New ValueList;
-
-				DescriptionLine = NewExpr.Place.BegLine - 1;
-				Description = Comments[DescriptionLine];
-				While Description <> Undefined Do
-					DescriptionList.Insert(0, Description);
-					DescriptionLine = DescriptionLine - 1;
-					Description = Comments[DescriptionLine];
-				EndDo;
-
-				NodeFields = NewExpr.Args[0].List;
-				NodeName = NewExpr.Args[1].Tail[0].Name;
-
-				Result.Add(StrTemplate(
+Процедура ПосетитьВыражениеНовый(ВыражениеНовый, Стек, Счетчики) Экспорт
+	
+	Если Область = "АбстрактноеСинтаксическоеДерево" Тогда 
+		
+		Если ВыражениеНовый.Имя = "Структура" Тогда 
+			Тег = Комментарии[ВыражениеНовый.Место.НомерСтрокиНачала];
+			Если Тег <> Неопределено И СтрНайти(Тег, "@Node") Тогда 
+				
+				СписокОписаний = Новый СписокЗначений;
+				
+				НомерСтрокиОписания = ВыражениеНовый.Место.НомерСтрокиНачала - 1;
+				Описание = Комментарии[НомерСтрокиОписания];
+				Пока Описание <> Неопределено Цикл
+					СписокОписаний.Вставить(0, Описание);
+					НомерСтрокиОписания = НомерСтрокиОписания - 1;
+					Описание = Комментарии[НомерСтрокиОписания];				
+				КонецЦикла;
+				
+				ПоляУзла = ВыражениеНовый.Аргументы[0].Список;
+				ИмяУзла = ВыражениеНовый.Аргументы[1].Хвост[0].Имя;
+				
+				Результат.Добавить(СтрШаблон(
 					"	<h3 id='%1'>%1<a class='permalink' href='#%1'>¶</a></h3>
-					|	<ul>" "",
-					NodeName
+					|	<ul>" "", 
+					ИмяУзла
 				));
+				
+				КоличествоОписаний = СписокОписаний.Количество();
+				Индекс = 0;
+				Пока Индекс < КоличествоОписаний Цикл
+					Элемент = СписокОписаний[Индекс];
+					Если СокрЛП(Элемент.Значение) = "<pre>" Тогда 
+						Буфер = Новый Массив;
+						Пока СокрЛП(Элемент.Значение) <> "</pre>" Цикл
+							Буфер.Добавить(Элемент.Значение);
+							Индекс = Индекс + 1;
+							Элемент = СписокОписаний[Индекс];						
+						КонецЦикла;
+						Результат.Добавить(СтрСоединить(Буфер, Символы.ПС));
+						Результат.Добавить("</pre>");					
+					Иначе 
+						Результат.Добавить(СтрШаблон("	<i>%1</i><br>" "", Элемент.Значение));					
+					КонецЕсли;
+					Индекс = Индекс + 1;				
+				КонецЦикла;
+				
+				Результат.Добавить("	<p>");
+				
+				Для Каждого Поле Из ПоляУзла Цикл 
+					ИмяПоля = СокрЛП(Поле.Значение);
+					Если Прав(ИмяПоля, 1) = "," Тогда 
+						ИмяПоля = Лев(ИмяПоля, СтрДлина(ИмяПоля) - 1);					
+					КонецЕсли;
+					СписокТипов = РазобратьТипы(Комментарии[Поле.Место.НомерСтрокиНачала]);
+					Результат.Добавить(СтрШаблон(
+						"		<li><strong>%1</strong>: %2%3</li>" "", 
+						ИмяПоля, 
+						ВывестиСсылкиНаТипы(СписокТипов), 
+						?(ИмяПоля = "Тип", " = Узлы." + ИмяУзла, "")
+					));				
+				КонецЦикла;
+				
+				Результат.Добавить("	</ul>" "");			
+			
+			КонецЕсли;		
+		КонецЕсли;	
+	
+	КонецЕсли;
 
-				DescriptionListCount = DescriptionList.Count();
-				Index = 0;
-				While Index < DescriptionListCount Do
-					Item = DescriptionList[Index];
-					If TrimAll(Item.Value) = "<pre>" Then
-						Buffer = New Array;
-						While TrimAll(Item.Value) <> "</pre>" Do
-							Buffer.Add(Item.Value);
-							Index = Index + 1;
-							Item = DescriptionList[Index];
-						EndDo;
-						Result.Add(StrConcat(Buffer, Chars.LF));
-						Result.Add("</pre>");
-					Else
-						Result.Add(StrTemplate("	<i>%1</i><br>" "", Item.Value));
-					EndIf;
-					Index = Index + 1;
-				EndDo;
+КонецПроцедуры // ПосетитьВыражениеНовый()
 
-				Result.Add("	<p>");
+Функция ВывестиСсылкиНаТипы(СписокТипов)
+	Перем Буфер;
+	Буфер = Новый Массив;
+	Для Каждого Элемент Из СписокТипов Цикл 
+		Если Элемент.Подчиненный = Неопределено Тогда 
+			Если НРег(Элемент.Идентификатор) = Элемент.Идентификатор Тогда 
+				Буфер.Добавить(Элемент.Идентификатор);			
+			Иначе 
+				Буфер.Добавить(СтрШаблон(
+					"<a href='#%1'>%1</a>", 
+					Элемент.Идентификатор
+				));			
+			КонецЕсли;		
+		ИначеЕсли TypeOf(Элемент.Подчиненный) = Type("Строка") Тогда 
+			Буфер.Добавить(СтрШаблон(
+				"%1 <a href='#%2'>%2</a>", 
+				Элемент.Идентификатор, 
+				Элемент.Подчиненный
+			));		
+		Иначе 
+			Буфер.Добавить(СтрШаблон(
+				"%1 (%2)", 
+				Элемент.Идентификатор, 
+				ВывестиСсылкиНаТипы(Элемент.Подчиненный)
+			));		
+		КонецЕсли;	
+	КонецЦикла;
+	Возврат СтрСоединить(Буфер, ", ");
+КонецФункции // ВывестиСсылкиНаТипы()
 
-				For Each Field In NodeFields Do
-					FieldName = TrimAll(Field.Value);
-					If Right(FieldName, 1) = "," Then
-						FieldName = Left(FieldName, StrLen(FieldName) - 1);
-					EndIf;
-					TypeList = ParseTypes(Comments[Field.Place.BegLine]);
-					Result.Add(StrTemplate(
-						"		<li><strong>%1</strong>: %2%3</li>" "",
-						FieldName,
-						GenerateTypeLinks(TypeList),
-						?(FieldName = "Type", " = Nodes." + NodeName, "")
-					));
-				EndDo;
+#Область ПарсерТипов
 
-				Result.Add("	</ul>" "");
+Функция РазобратьТипы(Типы)
+	Перем Позиция, Идентификатор, Список;
+	Позиция = 1; Список = Новый Массив;
+	Пока Истина Цикл
+		Подчиненный = Неопределено;
+		ПропуститьНевидимые(Типы, Позиция);
+		Идентификатор = Идентификатор(Типы, Позиция);
+		ПропуститьНевидимые(Типы, Позиция);
+		Если Идентификатор = "один" Тогда 
+			Если Сред(Типы, Позиция, 2) <> "из" Тогда 
+				ВызватьИсключение "ошибка";			
+			КонецЕсли;
+			Позиция = Позиция + 2;
+			Идентификатор = "один из";
+			ПропуститьНевидимые(Типы, Позиция);
+			Подчиненный = Идентификатор(Типы, Позиция);		
+		ИначеЕсли Сред(Типы, Позиция, 1) = "(" Тогда 
+			Позиция = Позиция + 1;
+			Начало = Позиция;
+			ПропуститьДо(Типы, Позиция, ")");
+			Подчиненный = РазобратьТипы(Сред(Типы, Начало, Позиция - Начало));
+			Позиция = Позиция + 1;		
+		КонецЕсли;
+		Список.Добавить(Новый Structure("Идентификатор, Подчиненный", Идентификатор, Подчиненный));
+		Если Сред(Типы, Позиция, 1) <> "," Тогда 
+			Прервать;		
+		КонецЕсли;
+		Позиция = Позиция + 1;	
+	КонецЦикла;
+	Возврат Список;
+КонецФункции // РазобратьТипы()
 
-			EndIf;
-		EndIf;
+Процедура ПропуститьНевидимые(Строка, Позиция)
+	Для Позиция = Позиция По СтрДлина(Строка) Цикл 
+		Если Не ПустаяСтрока(Сред(Строка, Позиция, 1)) Тогда 
+			Прервать;		
+		КонецЕсли;	
+	КонецЦикла;
+КонецПроцедуры // ПропуститьНевидимые()
 
-	EndIf;
+Процедура ПропуститьДо(Строка, Позиция, Символ)
+	Для Позиция = Позиция По СтрДлина(Строка) Цикл 
+		Если Сред(Строка, Позиция, 1) = Символ Тогда 
+			Прервать;		
+		КонецЕсли;	
+	КонецЦикла;
+КонецПроцедуры // ПропуститьДо()
 
-EndProcedure // VisitNewExpr()
+Функция Идентификатор(Строка, Позиция)
+	Перем Начало, Символ;
+	Начало = Позиция;
+	Для Позиция = Позиция По СтрДлина(Строка) Цикл 
+		Символ = Сред(Строка, Позиция, 1);
+		Если ПустаяСтрока(Символ) Or Символ = "," Тогда 
+			Прервать;		
+		КонецЕсли;	
+	КонецЦикла;
+	Возврат Сред(Строка, Начало, Позиция - Начало);
+КонецФункции // Идентификатор()
 
-Function GenerateTypeLinks(TypeList)
-	Var Buffer;
-	Buffer = New Array;
-	For Each Item In TypeList Do
-		If Item.Child = Undefined Then
-			If Lower(Item.Ident) = Item.Ident Then
-				Buffer.Add(Item.Ident);
-			Else
-				Buffer.Add(StrTemplate(
-					"<a href='#%1'>%1</a>",
-					Item.Ident
-				));
-			EndIf;
-		ElsIf TypeOf(Item.Child) = Type("Строка") Then
-			Buffer.Add(StrTemplate(
-				"%1 <a href='#%2'>%2</a>",
-				Item.Ident,
-				Item.Child
-			));
-		Else
-			Buffer.Add(StrTemplate(
-				"%1 (%2)",
-				Item.Ident,
-				GenerateTypeLinks(Item.Child)
-			));
-		EndIf;
-	EndDo;
-	Return StrConcat(Buffer, ", ");
-EndFunction // GenerateTypeLinks()
-
-#Region TypeParser
-
-Function ParseTypes(Types)
-	Var Pos, Ident, List;
-	Pos = 1; List = New Array;
-	While True Do
-		Child = Undefined;
-		SkipSpace(Types, Pos);
-		Ident = ScanIdent(Types, Pos);
-		SkipSpace(Types, Pos);
-		If Ident = "one" Then
-			If Mid(Types, Pos, 2) <> "of" Then
-				Raise "error";
-			EndIf;
-			Pos = Pos + 2;
-			Ident = "one of";
-			SkipSpace(Types, Pos);
-			Child = ScanIdent(Types, Pos);
-		ElsIf Mid(Types, Pos, 1) = "(" Then
-			Pos = Pos + 1;
-			Beg = Pos;
-			SkipUntil(Types, Pos, ")");
-			Child = ParseTypes(Mid(Types, Beg, Pos - Beg));
-			Pos = Pos + 1;
-		EndIf;
-		List.Add(New Structure("Ident, Child", Ident, Child));
-		If Mid(Types, Pos, 1) <> "," Then
-			Break;
-		EndIf;
-		Pos = Pos + 1;
-	EndDo;
-	Return List;
-EndFunction // ParseTypes()
-
-Procedure SkipSpace(Str, Pos)
-	For Pos = Pos To StrLen(Str) Do
-		If Not IsBlankString(Mid(Str, Pos, 1)) Then
-			Break;
-		EndIf;
-	EndDo;
-EndProcedure // SkipSpace()
-
-Procedure SkipUntil(Str, Pos, Chr)
-	For Pos = Pos To StrLen(Str) Do
-		If Mid(Str, Pos, 1) = Chr Then
-			Break;
-		EndIf;
-	EndDo;
-EndProcedure // SkipUntil()
-
-Function ScanIdent(Str, Pos)
-	Var Beg, Chr;
-	Beg = Pos;
-	For Pos = Pos To StrLen(Str) Do
-		Chr = Mid(Str, Pos, 1);
-		If IsBlankString(Chr) Or Chr = "," Then
-			Break;
-		EndIf;
-	EndDo;
-	Return Mid(Str, Beg, Pos - Beg);
-EndFunction // ScanIdent()
-
-#EndRegion // TypeParser
+#КонецОбласти

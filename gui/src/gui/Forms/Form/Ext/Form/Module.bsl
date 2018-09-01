@@ -35,9 +35,9 @@ Procedure TranslateAtServer()
 
 	BSLParser = ExternalDataProcessors.Create(ThisFile.Path + "BSLParser.epf", False);
 
-	BSLParser.Verbose = Verbose;
-	BSLParser.Location = Location;
-	BSLParser.Debug = Debug;
+	BSLParser.БолтливыйРежим = Verbose;
+	BSLParser.ПоложениеУзлаВАСТ = Location;
+	BSLParser.Отладка = Debug;
 
 	Start = CurrentUniversalDateInMilliseconds();
 
@@ -53,7 +53,7 @@ Procedure TranslateAtServer()
 		If ShowComments Then
 			Comments = New Map;
 			For Each Item In Parser_Module.Comments Do
-				Comments[Format(Item.Key, "NZ=0; NG=")] = Item.Value;
+				Comments[Format(Item.Key, "NZ=0; NG=")] = Item.Значение;
 			EndDo;
 			Parser_Module.Comments = Comments;
 		Else
@@ -64,18 +64,18 @@ Procedure TranslateAtServer()
 		
 	ElsIf Output = "Tree" Then
 
-		Parser_Module = BSLParser.ParseModule(Source.GetText());
+		Parser_Module = BSLParser.РазобратьМодуль(Source.GetText());
 		FillTree(Parser_Module);
 		
 	ElsIf Output = "Plugin" Then
 		
-		BSLParser.Location = True;
+		BSLParser.ПоложениеУзлаВАСТ = True;
 		
 		PluginProcessor = ExternalDataProcessors.Create(PluginPath, False);
-		Parser_Module = BSLParser.ParseModule(Source.GetText());
-		BSLParser.HookUp(PluginProcessor);
-		BSLParser.VisitModule(Parser_Module);
-		Result.SetText(PluginProcessor.Result());
+		Parser_Module = BSLParser.РазобратьМодуль(Source.GetText());
+		BSLParser.Подключить(PluginProcessor);
+		BSLParser.ПосетитьМодуль(Parser_Module);
+		Result.SetText(PluginProcessor.Результат());
 		
 	EndIf;
 
@@ -87,67 +87,67 @@ EndProcedure // TranslateAtServer()
 
 &AtServer
 Function FillTree(Module)
-	Var Place;
+	Var Место;
 	TreeItems = Tree.GetItems();
 	TreeItems.Clear();
 	Row = TreeItems.Add();
-	Row.Name = "Module";
-	Row.Type = Module.Type;
-	Row.Value = "<...>";
+	Row.Имя = "Module";
+	Row.Тип = Module.Тип;
+	Row.Значение = "<...>";
 	FillNode(Row, Module);
 EndFunction // FillTree() 
 
 &AtServer
 Function FillNode(Row, Node)
-	Var Place;
-	If Node.Property("Place", Place) And TypeOf(Place) = Type("Structure") Then
-		Row.Line = Place.BegLine;
-		Row.Pos = Place.Pos;
-		Row.Len = Place.Len;
+	Var Место;
+	If Node.Property("Место", Место) And ТипЗнч(Место) = Тип("Structure") Then
+		Row.НомерСтроки = Место.НомерСтрокиНачала;
+		Row.Позиция = Место.Позиция;
+		Row.Длина = Место.Длина;
 	EndIf;
 	TreeItems = Row.GetItems();
 	For Each Item In Node Do
-		If Item.Key = "Place"
-			Or Item.Key = "Type" Then
+		If Item.Key = "Место"
+			Or Item.Key = "Тип" Then
 			Continue;
 		EndIf; 
-		If TypeOf(Item.Value) = Type("Array") Then
+		If ТипЗнч(Item.Значение) = Тип("Array") Then
 			Row = TreeItems.Add();
-			Row.Name = Item.Key;
-			Row.Type = StrTemplate("List (%1)", Item.Value.Count());
-			Row.Value = "<...>";
+			Row.Имя = Item.Key;
+			Row.Тип = StrTemplate("List (%1)", Item.Значение.Count());
+			Row.Значение = "<...>";
 			RowItems = Row.GetItems();
 			Index = 0;
-			For Each Item In Item.Value Do
+			For Each Item In Item.Значение Do
 				Row = RowItems.Add();
 				Index = Index + 1;
-				Row.Name = Index;
+				Row.Имя = Index;
 				If Item = Undefined Then
-					Row.Value = "Undefined";
+					Row.Значение = "Undefined";
 				Else
-					Item.Property("Type", Row.Type);
-					Row.Value = "<...>";
+					Item.Property("Тип", Row.Тип);
+					Row.Значение = "<...>";
 					FillNode(Row, Item);
 				EndIf; 
 			EndDo;			
-		ElsIf TypeOf(Item.Value) = Type("Structure") Then
+		ElsIf ТипЗнч(Item.Значение) = Тип("Structure") Then
 			Row = TreeItems.Add();
-			Row.Name = Item.Key;
-			Row.Type = Item.Value.Type;
-			Row.Value = "<...>";
-			FillNode(Row, Item.Value);
+			Row.Имя = Item.Key;
+			Row.Тип = Item.Значение.Тип;
+			Row.Значение = "<...>";
+			FillNode(Row, Item.Значение);
 		Else
 			Row = TreeItems.Add();
-			Row.Name = Item.Key;
-			Row.Value = Item.Value;
-			Row.Type = TypeOf(Item.Value);
+			Row.Имя = Item.Key;
+			Row.Значение = Item.Значение;
+			Row.Тип = ТипЗнч(Item.Значение);
 		EndIf; 
 	EndDo;
 EndFunction // FillNode() 
 
 &AtServer
-Function ConvertJSON(Property, Value, Other, Cancel) Export
-	If Value = Null Then
+Function ConvertJSON(Property, Значение, Other, Cancel) Export
+	If Значение = Null Then
 		Return Undefined;
 	EndIf;
 EndFunction // ConvertJSON()
@@ -210,8 +210,8 @@ EndProcedure // ChoosePathNotifyChoice()
 &AtClient
 Procedure TreeSelection(Item, SelectedRow, Field, StandardProcessing)
 	Row = Tree.FindByID(SelectedRow);
-	If Row.Line > 0 Then
-		Items.Source.SetTextSelectionBounds(Row.Pos, Row.Pos + Row.Len);
+	If Row.НомерСтроки > 0 Then
+		Items.Source.SetTextSelectionBounds(Row.Позиция, Row.Позиция + Row.Длина);
 		CurrentItem = Items.Source;
 	EndIf; 
 EndProcedure // TreeSelection()

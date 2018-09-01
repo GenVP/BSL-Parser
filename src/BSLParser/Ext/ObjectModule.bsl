@@ -1,354 +1,359 @@
 ﻿
-#Region Constants
+#Область Константы
 
-Var Keywords;         // enum
-Var Tokens;           // enum
-Var Nodes;            // enum
-Var Directives;       // enum
-Var PrepInstructions; // enum
-Var PrepSymbols;      // enum
-Var BasicLitNoString; // array (one of Tokens)
-Var RelOperators;     // array (one of Tokens)
-Var AddOperators;     // array (one of Tokens)
-Var MulOperators;     // array (one of Tokens)
-Var InitOfExpression; // array (one of Tokens)
-Var EmptyArray;       // array
-Var TokenMap;         // map[string] (string)
-Var AlphaDigitMap;    // map[string] (string)
-Var Alpha, Digit;     // string
-Var Chars_LF;         // string
+Перем КлючевыеСлова;              // перечисление
+Перем Токены;                     // перечисление
+Перем Узлы;                       // перечисление
+Перем Директивы;                  // перечисление
+Перем ИнструкцииПрепроцессора;    // перечисление
+Перем СимволыПрепроцессора;       // перечисление
+Перем ОсновнойЛитералКромеСтроки; // массив (один из Токены)
+Перем ОператорыСравнения;         // массив (один из Токены)
+Перем ОператорыСложения;          // массив (один из Токены)
+Перем ОператорыУмножения;         // массив (один из Токены)
+Перем ТокеныНачалаВыражения;      // массив (один из Токены)
+Перем ПустойМассив;               // массив
+Перем КартаТокенов;               // соответствие[строка] (строка)
+Перем КартаБуквЦифр;              // соответствие[строка] (строка)
+Перем Буква, Цифра;               // строка
+Перем ПереводСтроки;              // строка
 
-#EndRegion // Constants
+#КонецОбласти // Константы
 
-#Region Settings
+#Область Настройки
 
-Var Verbose Export;  // boolean
-Var Debug Export;    // boolean
-Var Location Export; // boolean
+Перем БолтливыйРежим Экспорт;    // булево
+Перем Отладка Экспорт;           // булево
+Перем ПоложениеУзлаВАСТ Экспорт; // булево
 
-#EndRegion // Settings
+#КонецОбласти // Настройки
 
-#Region ParserState
+#Область СостояниеПарсера
 
-Var Parser_Source;    // string
-Var Parser_Len;       // number
-Var Parser_CurLine;   // number
-Var Parser_EndLine;   // number
-Var Parser_CurPos;    // number
-Var Parser_BegPos;    // number
-Var Parser_EndPos;    // number
-Var Parser_Char;      // string
-Var Parser_Tok;       // string (one of Tokens)
-Var Parser_Lit;       // string
-Var Parser_Val;       // number, string, date, boolean, undefined, null
-Var Parser_Scope;     // structure (Scope)
-Var Parser_Vars;      // structure as map[string] (Object)
-Var Parser_Methods;   // structure as map[string] (Object)
-Var Parser_Unknown;   // structure as map[string] (Object)
-Var Parser_IsFunc;    // boolean
-Var Parser_AllowVar;  // boolean
-Var Parser_Directive; // string (one of Directives)
-Var Parser_Interface; // array (Object)
-Var Parser_Comments;  // map[number] (string)
+Перем Парсер_Исходник;             // строка
+Перем Парсер_Длина;                // число
+Перем Парсер_ТекущийНомерСтроки;   // число
+Перем Парсер_НомерСтрокиОкончания; // число
+Перем Парсер_ТекущаяПозиция;       // число
+Перем Парсер_ПозицияНачала;        // число
+Перем Парсер_ПозицияОкончания;     // число
+Перем Парсер_Символ;               // строка
+Перем Парсер_Токен;                // строка (один из Токены)
+Перем Парсер_Литерал;              // строка
+Перем Парсер_Значение;             // число, строка, дата, булево, неопределено, null
+Перем Парсер_Окружение;            // структура (Окружение)
+Перем Парсер_Переменные;           // структура как соответствие[строка] (Объект)
+Перем Парсер_Методы;               // структура как соответствие[строка] (Объект)
+Перем Парсер_Неизвестные;          // структура как соответствие[строка] (Объект)
+Перем Парсер_ЭтоФункция;           // булево
+Перем Парсер_РазрешеныПерем;       // булево
+Перем Парсер_Директива;            // строка (один из Директивы)
+Перем Парсер_ПрограммныйИнтерфейс; // массив (Объект)
+Перем Парсер_Комментарии;          // соответствие[число] (строка)
 
-#EndRegion // ParserState
+#КонецОбласти // СостояниеПарсера
 
-#Region VisitorState
+#Область СостояниеПосетителя
 
-Var Visitor_Plugins;  // array (DataProcessorObject)
-Var Visitor_Hooks;    // structure as map[string] (array)
-Var Visitor_Stack;    // structure
-Var Visitor_Counters; // structure as map[string] (number)
+Перем Посетитель_Плагины;  // массив (ОбработкаОбъект)
+Перем Посетитель_Подписки; // структура как соответствие[строка] (массив)
+Перем Посетитель_Стек;     // структура
+Перем Посетитель_Счетчики; // структура как соответствие[строка] (число)
 
-#EndRegion // VisitorState
+#КонецОбласти // СостояниеПосетителя
 
-#Region Init
+#Область Инициализировать
 
-Procedure Init()
-	Var Letters, Index, Char;
+Процедура Инициализировать()
+	Перем Буквы, Индекс, Символ;
 
-	Verbose = False;
-	Debug = False;
-	Location = True;
+	БолтливыйРежим = Ложь;
+	Отладка = Ложь;
+	ПоложениеУзлаВАСТ = Истина;
 
-	InitEnums();
+	ИнициализироватьПеречисления();
 
-	BasicLitNoString = New Array;
-	BasicLitNoString.Add(Tokens.Number);
-	BasicLitNoString.Add(Tokens.DateTime);
-	BasicLitNoString.Add(Tokens.True);
-	BasicLitNoString.Add(Tokens.False);
-	BasicLitNoString.Add(Tokens.Undefined);
-	BasicLitNoString.Add(Tokens.Null);
+	ОсновнойЛитералКромеСтроки = Новый Массив;
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.Число);
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.ДатаВремя);
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.Истина);
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.Ложь);
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.Неопределено);
+	ОсновнойЛитералКромеСтроки.Добавить(Токены.Null);
 
-	RelOperators = New Array;
-	RelOperators.Add(Tokens.Eql);
-	RelOperators.Add(Tokens.Neq);
-	RelOperators.Add(Tokens.Lss);
-	RelOperators.Add(Tokens.Gtr);
-	RelOperators.Add(Tokens.Leq);
-	RelOperators.Add(Tokens.Geq);
+	ОператорыСравнения = Новый Массив;
+	ОператорыСравнения.Добавить(Токены.Равенство);
+	ОператорыСравнения.Добавить(Токены.НеРавно);
+	ОператорыСравнения.Добавить(Токены.Меньше);
+	ОператорыСравнения.Добавить(Токены.Больше);
+	ОператорыСравнения.Добавить(Токены.МеньшеИлиРавно);
+	ОператорыСравнения.Добавить(Токены.БольшеИлиРавно);
 
-	AddOperators = New Array;
-	AddOperators.Add(Tokens.Add);
-	AddOperators.Add(Tokens.Sub);
+	ОператорыСложения = Новый Массив;
+	ОператорыСложения.Добавить(Токены.Сложение);
+	ОператорыСложения.Добавить(Токены.Вычитание);
 
-	MulOperators = New Array;
-	MulOperators.Add(Tokens.Mul);
-	MulOperators.Add(Tokens.Div);
-	MulOperators.Add(Tokens.Mod);
+	ОператорыУмножения = Новый Массив;
+	ОператорыУмножения.Добавить(Токены.Умножение);
+	ОператорыУмножения.Добавить(Токены.Деление);
+	ОператорыУмножения.Добавить(Токены.Остаток);
 
-	InitOfExpression = New Array;
-	InitOfExpression.Add(Tokens.Add);
-	InitOfExpression.Add(Tokens.Sub);
-	InitOfExpression.Add(Tokens.Not);
-	InitOfExpression.Add(Tokens.Ident);
-	InitOfExpression.Add(Tokens.Lparen);
-	InitOfExpression.Add(Tokens.Number);
-	InitOfExpression.Add(Tokens.String);
-	InitOfExpression.Add(Tokens.StringBeg);
-	InitOfExpression.Add(Tokens.DateTime);
-	InitOfExpression.Add(Tokens.Ternary);
-	InitOfExpression.Add(Tokens.New);
-	InitOfExpression.Add(Tokens.True);
-	InitOfExpression.Add(Tokens.False);
-	InitOfExpression.Add(Tokens.Undefined);
-	InitOfExpression.Add(Tokens.Null);
+	ТокеныНачалаВыражения = Новый Массив;
+	ТокеныНачалаВыражения.Добавить(Токены.Сложение);
+	ТокеныНачалаВыражения.Добавить(Токены.Вычитание);
+	ТокеныНачалаВыражения.Добавить(Токены.Не);
+	ТокеныНачалаВыражения.Добавить(Токены.Идентификатор);
+	ТокеныНачалаВыражения.Добавить(Токены.ЛеваяКруглаяСкобка);
+	ТокеныНачалаВыражения.Добавить(Токены.Число);
+	ТокеныНачалаВыражения.Добавить(Токены.Строка);
+	ТокеныНачалаВыражения.Добавить(Токены.СтрокаНачало);
+	ТокеныНачалаВыражения.Добавить(Токены.ДатаВремя);
+	ТокеныНачалаВыражения.Добавить(Токены.ЗнакВопроса);
+	ТокеныНачалаВыражения.Добавить(Токены.New);
+	ТокеныНачалаВыражения.Добавить(Токены.Истина);
+	ТокеныНачалаВыражения.Добавить(Токены.Ложь);
+	ТокеныНачалаВыражения.Добавить(Токены.Неопределено);
+	ТокеныНачалаВыражения.Добавить(Токены.Null);
 
-	EmptyArray = New Array;
+	ПустойМассив = Новый Массив;
 
-	Chars_LF = Chars.LF;
+	ПереводСтроки = Символы.ПС;
 
-	Alpha = "Alpha";
-	Digit = "Digit";
+	Буква = "Буква";
+	Цифра = "Цифра";
 
-	TokenMap = New Map;
-	AlphaDigitMap = New Map;
+	КартаТокенов = Новый Соответствие;
+	КартаБуквЦифр = Новый Соответствие;
 
-	Letters = (
+	Буквы = (
 		"abcdefghijklmnopqrstuvwxyz"
 		+ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		+ "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 		+ "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
 	);
-	Index = 1;
-	Char = "_";
-	While Char <> "" Do
-		TokenMap[Char] = Alpha;
-		AlphaDigitMap[Char] = Alpha;
-		Char = Mid(Letters, Index, 1);
-		Index = Index + 1;
-	EndDo;
+	Индекс = 1;
+	Символ = "_";
+	Пока Символ <> "" Цикл
+		КартаТокенов[Символ] = Буква;
+		КартаБуквЦифр[Символ] = Буква;
+		Символ = Сред(Буквы, Индекс, 1);
+		Индекс = Индекс + 1;
+	КонецЦикла;
 
-	For Index = 0 To 9 Do
-		TokenMap[String(Index)] = Digit;
-		AlphaDigitMap[String(Index)] = Digit;
-	EndDo;
+	Для Индекс = 0 По 9 Цикл
+		КартаТокенов[Строка(Индекс)] = Цифра;
+		КартаБуквЦифр[Строка(Индекс)] = Цифра;
+	КонецЦикла;
 
-	TokenMap[""""] = Tokens.String;
-	TokenMap["|"] = Tokens.String;
-	TokenMap["'"] = Tokens.DateTime;
-	TokenMap["="] = Tokens.Eql;
-	TokenMap["+"] = Tokens.Add;
-	TokenMap["-"] = Tokens.Sub;
-	TokenMap["*"] = Tokens.Mul;
-	TokenMap["%"] = Tokens.Mod;
-	TokenMap["("] = Tokens.Lparen;
-	TokenMap[")"] = Tokens.Rparen;
-	TokenMap["["] = Tokens.Lbrack;
-	TokenMap["]"] = Tokens.Rbrack;
-	TokenMap["?"] = Tokens.Ternary;
-	TokenMap[","] = Tokens.Comma;
-	TokenMap["."] = Tokens.Period;
-	TokenMap[":"] = Tokens.Colon;
-	TokenMap[";"] = Tokens.Semicolon;
-	TokenMap[""] = Tokens.Eof;
+	КартаТокенов[""""] = Токены.Строка;
+	КартаТокенов["|"] = Токены.Строка;
+	КартаТокенов["'"] = Токены.ДатаВремя;
+	КартаТокенов["="] = Токены.Равенство;
+	КартаТокенов["+"] = Токены.Сложение;
+	КартаТокенов["-"] = Токены.Вычитание;
+	КартаТокенов["*"] = Токены.Умножение;
+	КартаТокенов["%"] = Токены.Остаток;
+	КартаТокенов["("] = Токены.ЛеваяКруглаяСкобка;
+	КартаТокенов[")"] = Токены.ПраваяКруглаяСкобка;
+	КартаТокенов["["] = Токены.ЛеваяКвадратнаяСкобка;
+	КартаТокенов["]"] = Токены.ПраваяКвадратнаяСкобка;
+	КартаТокенов["?"] = Токены.ЗнакВопроса;
+	КартаТокенов[","] = Токены.Запятая;
+	КартаТокенов["."] = Токены.Точка;
+	КартаТокенов[":"] = Токены.Двоеточие;
+	КартаТокенов[";"] = Токены.ТочкаСЗапятой;
+	КартаТокенов[""] = Токены.КонецФайла;
 
-EndProcedure // Init()
+КонецПроцедуры // Инициализировать()
 
-Procedure InitEnums()
-	Keywords = Keywords();
-	Tokens = Tokens(Keywords);
-	Nodes = Nodes();
-	Directives = Directives();
-	PrepInstructions = PrepInstructions();
-	PrepSymbols = PrepSymbols();
-EndProcedure // InitEnums()
+Процедура ИнициализироватьПеречисления()
+	КлючевыеСлова = КлючевыеСлова();
+	Токены = Токены(КлючевыеСлова);
+	Узлы = Узлы();
+	Директивы = Директивы();
+	ИнструкцииПрепроцессора = ИнструкцииПрепроцессора();
+	СимволыПрепроцессора = СимволыПрепроцессора();
+КонецПроцедуры // ИнициализироватьПеречисления()
 
-#EndRegion // Init
+#КонецОбласти // Инициализировать
 
-#Region Enums
+#Область Enums
 
-Function Keywords() Export
-	Return Enum(New Structure,
-		"If.Если, Then.Тогда, ElsIf.ИначеЕсли, Else.Иначе, EndIf.КонецЕсли,
-		|For.Для, Each.Каждого, In.Из, To.По, While.Пока, Do.Цикл, EndDo.КонецЦикла,
-		|Procedure.Процедура, EndProcedure.КонецПроцедуры, Function.Функция, EndFunction.КонецФункции,
-		|Var.Перем, Val.Знач, Return.Возврат, Continue.Продолжить, Break.Прервать,
-		|And.И, Or.Или, Not.Не,
-		|Try.Попытка, Except.Исключение, Raise.ВызватьИсключение, EndTry.КонецПопытки,
-		|New.Новый, Execute.Выполнить, Export.Экспорт, Goto.Перейти,
-		|True.Истина, False.Ложь, Undefined.Неопределено, Null"
+Функция КлючевыеСлова() Экспорт
+	Возврат Перечисление(Новый Структура,
+		"Если.If, Тогда.Then, ИначеЕсли.ElsIf, Иначе.Else, КонецЕсли.EndIf,
+		|Для.For, Каждого.Each, Из.In, По.To, Пока.While, Цикл.Do, КонецЦикла.EndDo,
+		|Процедура.Procedure, КонецПроцедуры.EndProcedure, Функция.Function, КонецФункции.EndFunction,
+		|Перем.Var, Знач.Val, Возврат.Return, Продолжить.Continue, Прервать.Break,
+		|И.And, Или.Or, Не.Not,
+		|Попытка.Try, Исключение.Except, ВызватьИсключение.Raise, КонецПопытки.EndTry,
+		|Новый.New, Выполнить.Execute, Экспорт.Export, Перейти.Goto,
+		|Истина.True, Ложь.False, Неопределено.Undefined, Null"
 	);
-EndFunction // Keywords()
+КонецФункции // Keywords()
 
-Function Tokens(Keywords = Undefined) Export
-	Var Tokens;
+Функция Токены(КлючевыеСлова = Неопределено) Экспорт
+	Перем Токены;
 
-	If Keywords = Undefined Then
-		Keywords = Keywords();
-	EndIf;
+	Если КлючевыеСлова = Неопределено Тогда
+		КлючевыеСлова = КлючевыеСлова();
+	КонецЕсли;
 
-	Tokens = Enum(New Structure(Keywords),
+	Токены = Перечисление(Новый Структура(КлючевыеСлова),
 
-		// Literals
+		// Литералы
 
-		"Ident, Number, String, DateTime,
-		// parts of strings
-		|StringBeg, StringMid, StringEnd,
+		"Идентификатор, Число, Строка, ДатаВремя,
+		// части строки
+		|СтрокаНачало, СтрокаПродолжение, СтрокаОкончание,
 
-		// Operators
+		// Операторы
 
-		// =   <>    <    >   <=   >=    +    -    *    /    %
-		|Eql, Neq, Lss, Gtr, Leq, Geq, Add, Sub, Mul, Div, Mod,
-		//    (       )       [       ]
-		|Lparen, Rparen, Lbrack, Rbrack,
-		//     ?      ,       .      :          ;
-		|Ternary, Comma, Period, Colon, Semicolon,
+		//       =       <>       <       >              <=              >=         +          -          *        /        %
+		|Равенство, НеРавно, Меньше, Больше, МеньшеИлиРавно, БольшеИлиРавно, Сложение, Вычитание, Умножение, Деление, Остаток,
+		//                (                    )                      [                       ]
+		|ЛеваяКруглаяСкобка, ПраваяКруглаяСкобка, ЛеваяКвадратнаяСкобка, ПраваяКвадратнаяСкобка,
+		//         ?        ,      .          :              ;
+		|ЗнакВопроса, Запятая, Точка, Двоеточие, ТочкаСЗапятой,
 
-		// Preprocessor instructions
-		|_If, _ElsIf, _Else, _EndIf, _Region, _EndRegion, _Use,
+		// Инструкции препроцессора
+		|_Если, _ИначеЕсли, _Иначе, _КонецЕсли, _Область, _КонецОбласти, _Использовать,
 
-		// Other
+		// Прочее
 
-		//         //          &      ~
-		|Eof, Comment, Directive, Label"
+		//                    //          &      ~
+		|КонецФайла, Комментарий, Директива, Метка"
 
 	);
 
-	Return Tokens;
-EndFunction // Tokens()
+	Возврат Токены;
+КонецФункции // Токены()
 
-Function Nodes() Export
-	Return Enum(New Structure,
-		"Module, Object,
-		|VarModDecl, VarModListDecl, VarLocDecl, AutoDecl, ParamDecl, MethodDecl, ProcSign, FuncSign,
-		|BasicLitExpr, FieldExpr, IndexExpr, IdentExpr, UnaryExpr, BinaryExpr, NewExpr, TernaryExpr, ParenExpr, NotExpr, StringExpr,
-		|AssignStmt, ReturnStmt, BreakStmt, ContinueStmt, RaiseStmt, ExecuteStmt, WhileStmt, ForStmt, ForEachStmt,
-		|TryStmt, ExceptStmt, GotoStmt, LabelStmt, CallStmt, IfStmt, ElsIfStmt, ElseStmt,
-		|PrepIfInst, PrepElsIfInst, PrepElseInst, PrepEndIfInst, PrepRegionInst, PrepEndRegionInst,
-		|PrepBinaryExpr, PrepNotExpr, PrepSymExpr, PrepUseInst"
+Функция Узлы() Экспорт
+	Возврат Перечисление(Новый Структура,
+		"Модуль, Объект,
+		|ОбъявлениеПеременнойУровняМодуля, ОбъявлениеСпискаПеременныхУровняМодуля, ОбъявлениеЛокальнойПеременной,
+		|ОбъявлениеАвтоПеременной, ОбъявлениеПараметра, ОбъявлениеМетода, СигнатураПроцедуры, СигнатураФункции,
+		|ВыражениеОсновнойЛитерал, ВыражениеПоле, ВыражениеИндекс, ВыражениеИдентификатор, ВыражениеУнарное,
+		|ВыражениеБинарное, ВыражениеНовый, ВыражениеТернарное, ВыражениеСкобки, ВыражениеНе, ВыражениеСтрока,
+		|ИнструкцияПрисваивания, ИнструкцияВозврат, ИнструкцияПрервать, ИнструкцияПродолжить,
+		|ИнструкцияВызватьИсключение, ИнструкцияВыполнить, ИнструкцияПока, ИнструкцияДля, ИнструкцияДляКаждого,
+		|ИнструкцияПопытка, ИнструкцияИсключение, ИнструкцияПерейти, ИнструкцияМетка, ИнструкцияВызвать,
+		|ИнструкцияЕсли, ИнструкцияИначеЕсли, ИнструкцияИначе, ИнструкцияПрепроцессораЕсли,
+		|ИнструкцияПрепроцессораИначеЕсли, ИнструкцияПрепроцессораИначе, ИнструкцияПрепроцессораКонецЕсли,
+		|ИнструкцияПрепроцессораОбласть, ИнструкцияПрепроцессораКонецОбласти, ВыражениеПрепроцессораБинарное,
+		|ВыражениеПрепроцессораНе, ВыражениеПрепроцессораСимвол, ИнструкцияПрепроцессораИспользовать"
 	);
-EndFunction // Nodes()
+КонецФункции // Узлы()
 
-Function Directives() Export
-	Return Enum(New Structure,
-		"AtClient.НаКлиенте,"
-		"AtServer.НаСервере,"
-		"AtServerNoContext.НаСервереБезКонтекста,"
-		"AtClientAtServerNoContext.НаКлиентеНаСервереБезКонтекста,"
-		"AtClientAtServer.НаКлиентеНаСервере"
+Функция Директивы() Экспорт
+	Возврат Перечисление(Новый Структура,
+		"НаКлиенте.AtClient,"
+		"НаСервере.AtServer,"
+		"НаСервереБезКонтекста.AtServerNoContext,"
+		"НаКлиентеНаСервереБезКонтекста.AtClientAtServerNoContext,"
+		"НаКлиентеНаСервере.AtClientAtServer"
 	);
-EndFunction // Directives()
+КонецФункции // Директивы()
 
-Function PrepInstructions() Export
-	Return Enum(New Structure,
-		"If.Если,"
-		"ElsIf.ИначеЕсли,"
-		"Else.Иначе,"
-		"EndIf.КонецЕсли,"
-		"Region.Область,"
-		"EndRegion.КонецОбласти,"
-		"Use.Использовать" // onescript
+Функция ИнструкцииПрепроцессора() Экспорт
+	Возврат Перечисление(Новый Структура,
+		"Если.If,"
+		"ИначеЕсли.ElsIf,"
+		"Иначе.Else,"
+		"КонецЕсли.EndIf,"
+		"Область.Region,"
+		"КонецОбласти.EndRegion,"
+		"Использовать.Use" // onescript
 	);
-EndFunction // PrepInstructions()
+КонецФункции // ИнструкцииПрепроцессора()
 
-Function PrepSymbols() Export
-	Return Enum(New Structure,
-		"Client.Клиент,"
-		"AtClient.НаКлиенте,"
-		"AtServer.НаСервере,"
-		"MobileAppClient.МобильноеПриложениеКлиент,"
-		"MobileAppServer.МобильноеПриложениеСервер,"
-		"ThickClientOrdinaryApplication.ТолстыйКлиентОбычноеПриложение,"
-		"ThickClientManagedApplication.ТолстыйКлиентУправляемоеПриложение,"
-		"Server.Сервер,"
-		"ExternalConnection.ВнешнееСоединение,"
-		"ThinClient.ТонкийКлиент,"
-		"WebClient.ВебКлиент"
+Функция СимволыПрепроцессора() Экспорт
+	Возврат Перечисление(Новый Структура,
+		"Клиент.Client,"
+		"НаКлиенте.AtClient,"
+		"НаСервере.AtServer,"
+		"МобильноеПриложениеКлиент.MobileAppClient,"
+		"МобильноеПриложениеСервер.MobileAppServer,"
+		"ТолстыйКлиентОбычноеПриложение.ThickClientИлиdinaryApplication,"
+		"ТолстыйКлиентУправляемоеПриложение.ThickClientManagedApplication,"
+		"Сервер.Server,"
+		"ВнешнееСоединение.ExternalConnection,"
+		"ТонкийКлиент.ThinClient,"
+		"ВебКлиент.WebClient"
 	);
-EndFunction // PrepSymbols()
+КонецФункции // СимволыПрепроцессора()
 
-Function Enum(Structure, Keys)
-	Var Items, Item, ItemList, Value;
+Функция Перечисление(Структура, Ключи)
+	Перем Элементы, Элемент, СписокЭлементов, Значение;
 
-	For Each Items In StrSplit(Keys, ",", False) Do
-		ItemList = StrSplit(Items, ".", False);
-		Value = TrimAll(ItemList[0]);
-		For Each Item In ItemList Do
-			Structure.Insert(TrimAll(Item), Value);
-		EndDo;
-	EndDo;
+	Для Каждого Элементы Из СтрРазделить(Ключи, ",", Ложь) Цикл
+		СписокЭлементов = СтрРазделить(Элементы, ".", Ложь);
+		Значение = СокрЛП(СписокЭлементов[0]);
+		Для Каждого Элемент Из СписокЭлементов Цикл
+			Структура.Вставить(СокрЛП(Элемент), Значение);
+		КонецЦикла;
+	КонецЦикла;
 
-	Return New FixedStructure(Structure);
-EndFunction // Enum()
+	Возврат Новый ФиксированнаяСтруктура(Структура);
+КонецФункции // Перечисление()
 
-#EndRegion // Enums
+#КонецОбласти // Enums
 
-#Region AbstractSyntaxTree
+#Область АбстрактноеСинтаксическоеДерево
 
-Function Module(Decls, Auto, Statements, Interface, Comments)
+Функция Модуль(Объявления, Авто, Инструкции, Интерфейс, Комментарии)
 	// Корень AST. Узел хранит информацию о модуле в целом.
-	Return New Structure( // @Node
-		"Type,"      // string (one of Nodes)
-		"Decls,"     // array (one of #Declarations)
-		"Auto,"      // array (Object)
-		"Body,"      // array (one of #Statements)
-		"Interface," // array (Object)
-		"Comments",  // map[number] (string)
-		Nodes.Module, Decls, Auto, Statements, Interface, Comments);
-EndFunction // Module()
+	Возврат Новый Структура( // @Node
+		"Тип,"         // строка (один из Узлы)
+		"Объявления,"  // массив (один из #Объявления)
+		"Авто,"        // массив (Объект)
+		"Инструкции,"  // массив (один из #Инструкции)
+		"Интерфейс,"   // массив (Объект)
+		"Комментарии", // соответствие[число] (строка)
+		Узлы.Модуль, Объявления, Авто, Инструкции, Интерфейс, Комментарии);
+КонецФункции // Модуль()
 
-#Region Scope
+#Область Окружение
 
-Function Scope(Outer)
-	Return New Structure(
-		"Outer,"   // undefined, structure (Scope)
-		"Objects," // structure as map[string] (Unknown, Func, Proc, VarMod, VarLoc, Param)
-		"Auto",    // array (VarLoc)
-		Outer, New Structure, New Array);
-EndFunction // Scope()
+Функция Окружение(Внешний)
+	Возврат Новый Структура(
+		"Внешний," // неопределено, структура (Окружение)
+		"Объекты," // структура как соответствие[строка] (Объект)
+		"Авто",    // массив (Объект)
+		Внешний, Новый Структура, Новый Массив);
+КонецФункции // Окружение()
 
-Function Object(Name, Decl = Undefined)
+Функция Объект(Имя, Объявление = Неопределено)
 	// Узел хранит информацию об объекте области видимости.
-	// Поле Decl хранит объявление данного объекта (undefined = объявление не обнаружено).
-	Return New Structure( // @Node
-		"Type," // string (one of Nodes)
-		"Name,"  // string
-		"Decl", // undefined, structure (one of #Declarations)
-		Nodes.Object, Name, Decl);
-EndFunction // Object()
+	// Поле Объявление хранит объявление данного объекта (неопределено = объявление не обнаружено).
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Имя,"        // строка
+		"Объявление", // неопределено, структура (один из #Объявления)
+		Узлы.Объект, Имя, Объявление);
+КонецФункции // Объект()
 
-#EndRegion // Scope
+#КонецОбласти // Окружение
 
-#Region Declarations
+#Область Объявления
 
-Function VarModListDecl(Directive, VarList, Place)
+Функция ОбъявлениеСпискаПеременныхУровняМодуля(Директива, СписокПеременных, Место)
 	// Хранит информацию об инструкции объявления переменных уровня модуля.
 	// Пример:
 	// <pre>
-	// &НаКлиенте            // поле "Directive"
-	// Перем П1 Экспорт, П2; // поле "List"
+	// &НаКлиенте            // поле "Директива"
+	// Перем П1 Экспорт, П2; // поле "Список"
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"      // string (one of Nodes)
-		"Directive," // string (one of Directives)
-		"List,"      // array (VarModDecl)
-		"Place",     // number, structure (Place)
-		Nodes.VarModListDecl, Directive, VarList, Place);
-EndFunction // VarModListDecl()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Директива," // строка (один из Директивы)
+		"Список,"    // массив (ОбъявлениеПеременнойУровняМодуля)
+		"Место",     // число, структура (Место)
+		Узлы.ОбъявлениеСпискаПеременныхУровняМодуля, Директива, СписокПеременных, Место);
+КонецФункции // ОбъявлениеСпискаПеременныхУровняМодуля()
 
-Function VarModDecl(Name, Directive, Exported, Place)
+Функция ОбъявлениеПеременнойУровняМодуля(Имя, Директива, Экспортировано, Место)
 	// Хранит информацию об объявлении переменной уровня модуля.
 	// Пример:
 	// Объявления переменных заключены в скобки <...>
@@ -356,599 +361,599 @@ Function VarModDecl(Name, Directive, Exported, Place)
 	// &НаКлиенте
 	// Перем <П1 Экспорт>, <П2>;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"      // string (one of Nodes)
-		"Name,"      // string
-		"Directive," // string (one of Directives)
-		"Export,"    // boolean
-		"Place",     // number, structure (Place)
-		Nodes.VarModDecl, Name, Directive, Exported, Place);
-EndFunction // VarModDecl()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Имя,"       // строка
+		"Директива," // строка (один из Директивы)
+		"Экспорт,"   // булево
+		"Место",     // число, структура (Место)
+		Узлы.ОбъявлениеПеременнойУровняМодуля, Имя, Директива, Экспортировано, Место);
+КонецФункции // ОбъявлениеПеременнойУровняМодуля()
 
-Function VarLocDecl(Name, Place)
+Функция ОбъявлениеЛокальнойПеременной(Имя, Место)
 	// Хранит информацию об объявлении локальной переменной.
 	// Пример:
 	// Объявления переменных заключены в скобки <...>
 	// <pre>
 	// Перем <П1>, <П2>;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Name,"  // string
-		"Place", // number, structure (Place)
-		Nodes.VarLocDecl, Name, Place);
-EndFunction // VarLocDecl()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Имя,"   // строка
+		"Место", // число, структура (Место)
+		Узлы.ОбъявлениеЛокальнойПеременной, Имя, Место);
+КонецФункции // ОбъявлениеЛокальнойПеременной()
 
-Function AutoDecl(Place)
+Функция ОбъявлениеАвтоПеременной(Место)
 	// Хранит информацию об объявлении авто-переменной.
 	// Пример:
 	// Объявления переменных заключены в скобки <...>
 	// <pre>
 	// <Макс> = 0;
 	// Для <Индекс> = 0 По Массив.ВГраница() Цикл
-	//	<Структура> = Массив[Индекс];
-	// 	Для Каждого <Элемент> Из Структура Цикл
-	//		Если Макс < Элемент.Значение Тогда
-	// 			Макс = Элемент.Значение;
-	// 		КонецЕсли;
-	// 	КонецЦикла;
+	//    <Структура> = Массив[Индекс];
+	//     Для Каждого <Элемент> Из Структура Цикл
+	//        Если Макс < Элемент.Значение Тогда
+	//             Макс = Элемент.Значение;
+	//         КонецЕсли;
+	//     КонецЦикла;
 	// КонецЦикла
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.AutoDecl, Place);	
-EndFunction // AutoDecl() 
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ОбъявлениеАвтоПеременной, Место);
+КонецФункции // ОбъявлениеАвтоПеременной()
 
-Function ParamDecl(Name, ByVal, Value = Undefined, Place)
+Функция ОбъявлениеПараметра(Имя, ПоЗначению, Значение = Неопределено, Место)
 	// Хранит информацию об объявлении параметра.
 	// Пример:
 	// Объявления параметров заключены в скобки <...>
 	// <pre>
 	// Процедура(<П1>, <Знач П2 = Неопределено>)
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Name,"  // string
-		"ByVal," // boolean
-		"Value," // undefined, structure (UnaryExpr, BasicLitExpr)
-		"Place", // number, structure (Place)
-		Nodes.ParamDecl, Name, ByVal, Value, Place);
-EndFunction // ParamDecl()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Имя,"        // строка
+		"ПоЗначению," // булево
+		"Значение,"   // неопределено, структура (ВыражениеУнарное, ВыражениеОсновнойЛитерал)
+		"Место",      // число, структура (Место)
+		Узлы.ОбъявлениеПараметра, Имя, ПоЗначению, Значение, Место);
+КонецФункции // ОбъявлениеПараметра()
 
-Function MethodDecl(Sign, Decls, Auto, Body, Place)
+Функция ОбъявлениеМетода(Сигнатура, Объявления, Авто, Инструкции, Место)
 	// Хранит информацию об объявлении метода.
-	// Сигнатура метода хранится в поле Sign.
+	// Сигнатура метода хранится в поле Сигнатура.
 	// &НаКлиенте
 	// Функция Тест() Экспорт
-	//     Перем П1;    // поле "Vars" хранит объявления переменных.
-	//     П1 = 2;      // операторы собираются в поле Body
-	//     П2 = П1 + 2; // Авто-переменные (П2) собираются в поле "Auto".
+	//     Перем П1;    // поле "Переменные" хранит объявления переменных.
+	//     П1 = 2;      // операторы собираются в поле Инструкции
+	//     П2 = П1 + 2; // Авто-переменные (П2) собираются в поле "Авто".
 	// КонецФункции
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Sign,"  // structure (ProcSign, FuncSign)
-		"Vars,"  // array (VarLocDecl)
-		"Auto,"  // array (Object)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.MethodDecl, Sign, Decls, Auto, Body, Place);
-EndFunction // MethodDecl()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Сигнатура,"  // структура (СигнатураПроцедуры, СигнатураФункции)
+		"Переменные," // массив (ОбъявлениеЛокальнойПеременной)
+		"Авто,"       // массив (Объект)
+		"Инструкции," // массив (один из #Инструкции)
+		"Место",      // число, структура (Место)
+		Узлы.ОбъявлениеМетода, Сигнатура, Объявления, Авто, Инструкции, Место);
+КонецФункции // ОбъявлениеМетода()
 
-Function ProcSign(Name, Directive, Params, Exported, Place)
+Функция СигнатураПроцедуры(Имя, Директива, Параметры, Экспортировано, Место)
 	// Хранит информацию о сигнатуре объявления процедуры.
 	// Пример:
 	// <pre>
 	// &НаКлиенте
 	// Процедура Тест(П1, П2) Экспорт
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"      // string (one of Nodes)
-		"Name,"      // string
-		"Directive," // string (one of Directives)
-		"Params,"    // array (ParamDecl)
-		"Export,"    // boolean
-		"Place",     // number, structure (Place)
-		Nodes.ProcSign, Name, Directive, Params, Exported, Place);
-EndFunction // ProcSign()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Имя,"       // строка
+		"Директива," // строка (один из Директивы)
+		"Параметры," // массив (ОбъявлениеПараметра)
+		"Экспорт,"   // булево
+		"Место",     // число, структура (Место)
+		Узлы.СигнатураПроцедуры, Имя, Директива, Параметры, Экспортировано, Место);
+КонецФункции // СигнатураПроцедуры()
 
-Function FuncSign(Name, Directive, Params, Exported, Place)
+Функция СигнатураФункции(Имя, Директива, Параметры, Экспортировано, Место)
 	// Хранит информацию о сигнатуре объявления функции.
 	// Пример:
 	// <pre>
 	// &НаКлиенте
 	// Функция Тест(П1, П2) Экспорт
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"      // string (one of Nodes)
-		"Name,"      // string
-		"Directive," // string (one of Directives)
-		"Params,"    // array (ParamDecl)
-		"Export,"    // boolean
-		"Place",     // number, structure (Place)
-		Nodes.FuncSign, Name, Directive, Params, Exported, Place);
-EndFunction // FuncSign()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Имя,"       // строка
+		"Директива," // строка (один из Директивы)
+		"Параметры," // массив (ОбъявлениеПараметра)
+		"Экспорт,"   // булево
+		"Место",     // число, структура (Место)
+		Узлы.СигнатураФункции, Имя, Директива, Параметры, Экспортировано, Место);
+КонецФункции // СигнатураФункции()
 
-#EndRegion // Declarations
+#КонецОбласти // Объявления
 
-#Region Expressions
+#Область Выражения
 
-Function BasicLitExpr(Kind, Value, Place)
+Функция ВыражениеОсновнойЛитерал(Вид, Значение, Место)
 	// Хранит информацию о литерале примитивного типа.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Kind,"  // string (one of Tokens)
-		"Value," // undefined, string, number, boolean, date, null
-		"Place", // number, structure (Place)
-		Nodes.BasicLitExpr, Kind, Value, Place);
-EndFunction // BasicLitExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"      // строка (один из Узлы)
+		"Вид,"      // строка (один из Токены)
+		"Значение," // неопределено, строка, число, булево, дата, null
+		"Место",    // число, структура (Место)
+		Узлы.ВыражениеОсновнойЛитерал, Вид, Значение, Место);
+КонецФункции // ВыражениеОсновнойЛитерал()
 
-Function FieldExpr(Name, Args, Place)
+Функция ВыражениеПоле(Имя, Аргументы, Место)
 	// Хранит информацию об обращении к полю объекта через точку.
-	// В поле Name содержится имя поля.
-	// В поле Args содержатся аргументы вызова (если это вызов).
+	// В поле Имя содержится имя поля.
+	// В поле Аргументы содержатся аргументы вызова (если это вызов).
 	// Пример:
 	// <pre>
 	// // обращения через точку заключены в скобки <...>
 	// Значение = Объект<.Поле>
 	// Значение = Объект<.Добавить(П1, П2)>
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Name,"  // string
-		"Args,"  // undefined, array (undefined, one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.FieldExpr, Name, Args, Place);
-EndFunction // FieldExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Имя,"       // строка
+		"Аргументы," // неопределено, массив (неопределено, один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеПоле, Имя, Аргументы, Место);
+КонецФункции // ВыражениеПоле()
 
-Function IndexExpr(Expr, Place)
+Функция ВыражениеИндекс(Выражение, Место)
 	// Хранит информацию об обращении к элементу объекта по индексу.
 	// Пример:
 	// <pre>
 	// // обращение по индексу заключено в скобки <...>
 	// Значение = Объект<[Ключ]>
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.IndexExpr, Expr, Place);
-EndFunction // IndexExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеИндекс, Выражение, Место);
+КонецФункции // ВыражениеИндекс()
 
-Function IdentExpr(Object, Tail, Args, Place)
+Функция ВыражениеИдентификатор(Объект, Хвост, Аргументы, Место)
 	// Хранит информацию об обращении к идентификатору.
-	// В поле Head содержится объект области видимости соответствующий идентификатору.
-	// В поле Tail содержится последовательность обращений через точку и по индексу.
-	// В поле Args содержатся аргументы вызова (если это вызов).
+	// В поле Голова содержится объект области видимости соответствующий идентификатору.
+	// В поле Хвост содержится последовательность обращений через точку и по индексу.
+	// В поле Аргументы содержатся аргументы вызова (если это вызов).
 	// Пример:
 	// <pre>
 	// // идентификатор заключен в скобки <...>
-	// // поле "Head" будет содержать объект переменной "Запрос";
-	// // поле "Tail" будет содержать три обращения;
-	// // поле "Args" будет равно Неопределено, т.к. обращение к "Запрос" не является вызовом.
+	// // поле "Голова" будет содержать объект переменной "Запрос";
+	// // поле "Хвост" будет содержать три обращения;
+	// // поле "Аргументы" будет равно Неопределено, т.к. обращение к "Запрос" не является вызовом.
 	// Возврат <Запрос.Выполнить().Выгрузить()[0]>;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Head,"  // structure (Object)
-		"Tail,"  // array (FieldExpr, IndexExpr)
-		"Args,"  // undefined, array (undefined, one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.IdentExpr, Object, Tail, Args, Place);
-EndFunction // IdentExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Голова,"    // структура (Объект)
+		"Хвост,"     // массив (ВыражениеПоле, ВыражениеИндекс)
+		"Аргументы," // неопределено, массив (неопределено, один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеИдентификатор, Объект, Хвост, Аргументы, Место);
+КонецФункции // ВыражениеИдентификатор()
 
-Function UnaryExpr(Operator, Operand, Place)
+Функция ВыражениеУнарное(Оператор, Операнд, Место)
 	// Хранит унарное выражение.
 	// Пример:
 	// <pre>
 	// // унарные выражения заключены в скобки <...>
-	// // поле "Operator" равно либо Tokens.Add, либо Tokens.Sub
-	// // поле "Operand" хранит операнд-выражение
+	// // поле "Оператор" равно либо Токены.Сложение, либо Токены.Вычитание
+	// // поле "Операнд" хранит операнд-выражение
 	// Значение = <-Сумма> * 2;
 	// Значение = <+Сумма>;
 	// Значение = <-(Сумма1 + Сумма2)> / 2;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"     // string (one of Nodes)
-		"Operator," // string (one of Tokens)
-		"Operand,"  // structure (one of #Expressions)
-		"Place",    // number, structure (Place)
-		Nodes.UnaryExpr, Operator, Operand, Place);
-EndFunction // UnaryExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"      // строка (один из Узлы)
+		"Оператор," // строка (один из Токены)
+		"Операнд,"  // структура (один из #Выражения)
+		"Место",    // число, структура (Место)
+		Узлы.ВыражениеУнарное, Оператор, Операнд, Место);
+КонецФункции // ВыражениеУнарное()
 
-Function BinaryExpr(Left, Operator, Right, Place)
+Функция ВыражениеБинарное(Левый, Оператор, Правый, Место)
 	// Хранит бинарное выражение.
 	// Пример:
 	// <pre>
 	// // бинарные выражения заключены в скобки <...>
-	// // поле "Operator" равно одному из допустимых операторов:
+	// // поле "Оператор" равно одному из допустимых операторов:
 	// // - логических (кроме "Не")
 	// // - реляционных
 	// // - арифметических
-	// // поля "Left" и "Right" содержат операнды-выражения
+	// // поля "Левый" и "Правый" содержат операнды-выражения
 	// Если <Не Отмена И Продолжить> Тогда
 	//     Значение = <Сумма1 + <Сумма2 * Коэффициент>>;
 	// КонецЕсли;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"     // string (one of Nodes)
-		"Left,"     // structure (one of #Expressions)
-		"Operator," // string (one of Tokens)
-		"Right,"    // structure (one of #Expressions)
-		"Place",    // number, structure (Place)
-		Nodes.BinaryExpr, Left, Operator, Right, Place);
-EndFunction // BinaryExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"      // строка (один из Узлы)
+		"Левый,"    // структура (один из #Выражения)
+		"Оператор," // строка (один из Токены)
+		"Правый,"   // структура (один из #Выражения)
+		"Место",    // число, структура (Место)
+		Узлы.ВыражениеБинарное, Левый, Оператор, Правый, Место);
+КонецФункции // ВыражениеБинарное()
 
-Function NewExpr(Name, Args, Place)
+Функция ВыражениеНовый(Имя, Аргументы, Место)
 	// Хранит выражение "Новый".
 	// Пример:
 	// <pre>
 	// // выражения "Новый" заключены в скобки <...>
-	// // в этом варианте поле "Name" хранит имя типа "Массив",
-	// // а поле "Args" хранит массив из одного выражения
+	// // в этом варианте поле "Имя" хранит имя типа "Массив",
+	// // а поле "Аргументы" хранит массив из одного выражения
 	// Параметры = <Новый Массив(1)>;
 	// Параметры[0] = 10;
-	// // в этом варианте поле "Name" равно Неопределено,
-	// // а поле "Args" хранит массив из двух выражений
+	// // в этом варианте поле "Имя" равно Неопределено,
+	// // а поле "Аргументы" хранит массив из двух выражений
 	// Массив = <Новый (Тип("Массив"), Параметры)>;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Name,"  // undefined, string
-		"Args,"  // array (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.NewExpr, Name, Args, Place);
-EndFunction // NewExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Имя,"       // неопределено, строка
+		"Аргументы," // массив (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеНовый, Имя, Аргументы, Место);
+КонецФункции // ВыражениеНовый()
 
-Function TernaryExpr(Cond, ThenPart, ElsePart, Tail, Place)
+Функция ВыражениеТернарное(Условие, ТогдаЧасть, ИначеЧасть, Хвост, Место)
 	// Хранит тернарное выражение "?(,,)".
 	// Пример:
 	// <pre>
-	// Значение = ?(Ложь,   // поле "Cond"
-	//     Неопределено,    // поле "Then"
-	//     Новый Массив     // поле "Else"
-	// ).Количество();      // поле "Tail"
+	// Значение = ?(Ложь,   // поле "Условие"
+	//     Неопределено,    // поле "Тогда"
+	//     Новый Массив     // поле "Иначе"
+	// ).Количество();      // поле "Хвост"
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #Expressions)
-		"Then,"  // structure (one of #Expressions)
-		"Else,"  // structure (one of #Expressions)
-		"Tail,"  // array (FieldExpr, IndexExpr)
-		"Place", // number, structure (Place)
-		Nodes.TernaryExpr, Cond, ThenPart, ElsePart, Tail, Place);
-EndFunction // TernaryExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"     // строка (один из Узлы)
+		"Условие," // структура (один из #Выражения)
+		"Тогда,"   // структура (один из #Выражения)
+		"Иначе,"   // структура (один из #Выражения)
+		"Хвост,"   // массив (ВыражениеПоле, ВыражениеИндекс)
+		"Место",   // число, структура (Место)
+		Узлы.ВыражениеТернарное, Условие, ТогдаЧасть, ИначеЧасть, Хвост, Место);
+КонецФункции // ВыражениеТернарное()
 
-Function ParenExpr(Expr, Place)
+Функция ВыражениеСкобки(Выражение, Место)
 	// Хранит скобочное выражение.
 	// Пример:
 	// <pre>
 	// // скобочное выражение заключено в скобки <...>
 	// Сумма = <(Сумма1 + Сумма2)> * Количество;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.ParenExpr, Expr, Place);
-EndFunction // ParenExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеСкобки, Выражение, Место);
+КонецФункции // ВыражениеСкобки()
 
-Function NotExpr(Expr, Place)
+Функция ВыражениеНе(Выражение, Место)
 	// Хранит выражение, к которому применено логическое отрицание "Не".
 	// Пример:
 	// <pre>
 	// // выражение-отрицание заключено в скобки <...>
 	// НеРавны = <Не Сумма1 = Сумма2>;
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.NotExpr, Expr, Place);
-EndFunction // NotExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+	Узлы.ВыражениеНе, Выражение, Место);
+КонецФункции // ВыражениеНе()
 
-Function StringExpr(ExprList, Place)
+Функция ВыражениеСтрока(ВыражениеСписок, Место)
 	// Хранит строковое выражение.
-	// Поле "List" хранит упорядоченный список частей строки.
+	// Поле "Список" хранит упорядоченный список частей строки.
 	// Пример:
 	// <pre>
-	// Строка1 = "Часть1" "Часть2"; // эта строка состоит из двух частей типа Nodes.String
+	// Строка1 = "Часть1" "Часть2"; // эта строка состоит из двух частей типа Узлы.Строка
 	// Строка2 =                    // эта строка состоит из пяти частей типа:
-	// "Начало строки               // Nodes.StringBeg
-	// | продолжение строки         // Nodes.StringMid
-	// | еще продолжение строки     // Nodes.StringMid
-	// | окончание строки"          // Nodes.StringEnd
-	// "еще часть";                 // Nodes.String
+	// "Начало строки               // Узлы.СтрокаНачало
+	// | продолжение строки         // Узлы.СтрокаПродолжение
+	// | еще продолжение строки     // Узлы.СтрокаПродолжение
+	// | окончание строки"          // Узлы.СтрокаОкончание
+	// "еще часть";                 // Узлы.Строка
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"List,"  // array (BasicLitExpr)
-		"Place", // number, structure (Place)
-		Nodes.StringExpr, ExprList, Place);
-EndFunction // StringExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"    // строка (один из Узлы)
+		"Список," // массив (ВыражениеОсновнойЛитерал)
+		"Место",  // число, структура (Место)
+		Узлы.ВыражениеСтрока, ВыражениеСписок, Место);
+КонецФункции // ВыражениеСтрока()
 
-#EndRegion // Expressions
+#КонецОбласти // Выражения
 
-#Region Statements
+#Область Инструкции
 
-Function AssignStmt(Left, Right, Place)
+Функция ИнструкцияПрисваивания(Левый, Правый, Место)
 	// Хранит оператор присваивания.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Left,"  // structure (IdentExpr)
-		"Right," // structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.AssignStmt, Left, Right, Place);
-EndFunction // AssignStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"    // строка (один из Узлы)
+		"Левый,"  // структура (ВыражениеИдентификатор)
+		"Правый," // структура (один из #Выражения)
+		"Место",  // число, структура (Место)
+		Узлы.ИнструкцияПрисваивания, Левый, Правый, Место);
+КонецФункции // ИнструкцияПрисваивания()
 
-Function ReturnStmt(Expr = Undefined, Place)
+Функция ИнструкцияВозврат(Выражение = Неопределено, Место)
 	// Хранит оператор "Возврат".
-	// Поле "Expr" равно Неопределено если это возврат из процедуры.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // undefined, structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.ReturnStmt, Expr, Place);
-EndFunction // ReturnStmt()
+	// Поле "Выражение" равно Неопределено если это возврат из процедуры.
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // неопределено, структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ИнструкцияВозврат, Выражение, Место);
+КонецФункции // ИнструкцияВозврат()
 
-Function BreakStmt(Place)
+Функция ИнструкцияПрервать(Место)
 	// Хранит оператор "Прервать".
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.BreakStmt, Place);
-EndFunction // BreakStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрервать, Место);
+КонецФункции // ИнструкцияПрервать()
 
-Function ContinueStmt(Place)
+Функция ИнструкцияПродолжить(Место)
 	// Хранит оператор "Продолжить".
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.ContinueStmt, Place);
-EndFunction // ContinueStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПродолжить, Место);
+КонецФункции // ИнструкцияПродолжить()
 
-Function RaiseStmt(Expr = Undefined, Place)
+Функция ИнструкцияВызватьИсключение(Выражение = Неопределено, Место)
 	// Хранит оператор "ВызватьИсключение".
-	// Поле "Expr" равно Неопределено если это вариант оператора без выражения.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // undefined, structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.RaiseStmt, Expr, Place);
-EndFunction // RaiseStmt()
+	// Поле "Выражение" равно Неопределено если это вариант оператора без выражения.
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // неопределено, структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ИнструкцияВызватьИсключение, Выражение, Место);
+КонецФункции // ИнструкцияВызватьИсключение()
 
-Function ExecuteStmt(Expr, Place)
+Функция ИнструкцияВыполнить(Выражение, Место)
 	// Хранит оператор "Выполнить".
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // structure (one of #Expressions)
-		"Place", // number, structure (Place)
-		Nodes.ExecuteStmt, Expr, Place);
-EndFunction // ExecuteStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // структура (один из #Выражения)
+		"Место",     // число, структура (Место)
+		Узлы.ИнструкцияВыполнить, Выражение, Место);
+КонецФункции // ИнструкцияВыполнить()
 
-Function CallStmt(IdentExpr, Place)
+Функция ИнструкцияВызвать(ВыражениеИдентификатор, Место)
 	// Хранит вызов процедуры или функции как процедуры.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Ident," // structure (IdentExpr)
-		"Place", // number, structure (Place)
-		Nodes.CallStmt, IdentExpr, Place);
-EndFunction // CallStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"           // строка (один из Узлы)
+		"Идентификатор," // структура (ВыражениеИдентификатор)
+		"Место",         // число, структура (Место)
+		Узлы.ИнструкцияВызвать, ВыражениеИдентификатор, Место);
+КонецФункции // ИнструкцияВызвать()
 
-Function IfStmt(Cond, ThenPart, ElsIfPart = Undefined, ElsePart = Undefined, Place)
+Функция ИнструкцияЕсли(Условие, ТогдаЧасть, ИначеЕслиЧасть = Неопределено, ИначеЧасть = Неопределено, Место)
 	// Хранит оператор "Если".
 	// Пример:
 	// <pre>
-	// Если Сумма > 0 Тогда // поле "Cond" хранит условие (выражение)
-	//     // поле "Then" хранит операторы в этом блоке
+	// Если Сумма > 0 Тогда // поле "Условие" хранит условие (выражение)
+	//     // поле "Тогда" хранит операторы в этом блоке
 	// ИначеЕсли Сумма = 0 Тогда
-	//     // поле-массив "ElsIf" хранит последовательность блоков ИначеЕсли
+	//     // поле-массив "ИначеЕсли" хранит последовательность блоков ИначеЕсли
 	// Иначе
-	//     // поле "Else" хранит операторы в этом блоке
+	//     // поле "Иначе" хранит операторы в этом блоке
 	// КонецЕсли
 	// </pre>
-	// Поля "ElsIf" и "Else" равны Неопределено если
+	// Поля "ИначеЕсли" и "Иначе" равны Неопределено если
 	// соответствующие блоки отсутствуют в исходном коде.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #Expressions)
-		"Then,"  // array (one of #Statements)
-		"ElsIf," // undefined, array (ElsIfStmt)
-		"Else,"  // undefined, structure (ElseStmt)
-		"Place", // number, structure (Place)
-		Nodes.IfStmt, Cond, ThenPart, ElsIfPart, ElsePart, Place);
-EndFunction // IfStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Условие,"   // структура (один из #Выражения)
+		"Тогда,"     // массив (один из #Инструкции)
+		"ИначеЕсли," // неопределено, массив (ИнструкцияИначеЕсли)
+		"Иначе,"     // неопределено, структура (ИнструкцияИначе)
+		"Место",     // число, структура (Место)
+		Узлы.ИнструкцияЕсли, Условие, ТогдаЧасть, ИначеЕслиЧасть, ИначеЧасть, Место);
+КонецФункции // ИнструкцияЕсли()
 
-Function ElseStmt(Body, Place)
+Функция ИнструкцияИначе(Инструкции, Место)
 	// Хранит блок "Иначе"
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.ElseStmt, Body, Place);
-EndFunction // ElseStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Инструкции," // массив (один из #Инструкции)
+		"Место",      // число, структура (Место)
+		Узлы.ИнструкцияИначе, Инструкции, Место);
+КонецФункции // ИнструкцияИначе()
 
-Function ElsIfStmt(Cond, ThenPart, Place)
+Функция ИнструкцияИначеЕсли(Условие, ТогдаЧасть, Место)
 	// Хранит блок "ИначеЕсли" оператора "Если".
 	// Пример:
 	// <pre>
 	// ...
-	// ИначеЕсли Сумма < 0 Тогда // поле "Cond" хранит условие (выражение)
-	//     // поле "Then" хранит операторы в этом блоке
+	// ИначеЕсли Сумма < 0 Тогда // поле "Условие" хранит условие (выражение)
+	//     // поле "Тогда" хранит операторы в этом блоке
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #Expressions)
-		"Then,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.ElsIfStmt, Cond, ThenPart, Place);
-EndFunction // ElsIfStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"     // строка (один из Узлы)
+		"Условие," // структура (один из #Выражения)
+		"Тогда,"   // массив (один из #Инструкции)
+		"Место",   // число, структура (Место)
+		Узлы.ИнструкцияИначеЕсли, Условие, ТогдаЧасть, Место);
+КонецФункции // ИнструкцияИначеЕсли()
 
-Function WhileStmt(Cond, Body, Place)
+Функция ИнструкцияПока(Условие, Инструкции, Место)
 	// Хранит оператор цикла "Пока".
 	// Пример:
 	// <pre>
-	// Пока Индекс > 0 Цикл // поле "Cond" хранит условие (выражение)
-	//     // поле "Body" хранит операторы в этом блоке
+	// Пока Индекс > 0 Цикл // поле "Условие" хранит условие (выражение)
+	//     // поле "Инструкции" хранит операторы в этом блоке
 	// КонецЦикла
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #Expressions)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.WhileStmt, Cond, Body, Place);
-EndFunction // WhileStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Условие,"    // структура (один из #Выражения)
+		"Инструкции," // массив (один из #Инструкции)
+		"Место",      // число, структура (Место)
+		Узлы.ИнструкцияПока, Условие, Инструкции, Место);
+КонецФункции // ИнструкцияПока()
 
-Function ForStmt(IdentExpr, From, Until, Body, Place)
+Функция ИнструкцияДля(ВыражениеИдентификатор, НачинаяС, До, Инструкции, Место)
 	// Хранит оператор цикла "Для".
 	// Пример:
 	// <pre>
-	// Для Индекс = 0      // поля "Ident" и "From" хранят переменную и выражение инициализации.
-	//   По Длина - 1 Цикл // поле "To" хранит выражение границы
-	//     // поле "Body" хранит операторы в этом блоке
+	// Для Индекс = 0      // поля "Идентификатор" и "НачинаяС" хранят переменную и выражение инициализации.
+	//   По Длина - 1 Цикл // поле "По" хранит выражение границы
+	//     // поле "Инструкции" хранит операторы в этом блоке
 	// КонецЦикла
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Ident," // structure (IdentExpr)
-		"From,"  // structure (one of #Expressions)
-		"To,"    // structure (one of #Expressions)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.ForStmt, IdentExpr, From, Until, Body, Place);
-EndFunction // ForStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"           // строка (один из Узлы)
+		"Идентификатор," // структура (ВыражениеИдентификатор)
+		"НачинаяС,"      // структура (один из #Выражения)
+		"По,"            // структура (один из #Выражения)
+		"Инструкции,"    // массив (один из #Инструкции)
+		"Место",         // число, структура (Место)
+		Узлы.ИнструкцияДля, ВыражениеИдентификатор, НачинаяС, До, Инструкции, Место);
+КонецФункции // ИнструкцияДля()
 
-Function ForEachStmt(IdentExpr, Collection, Body, Place)
+Функция ИнструкцияДляКаждого(ВыражениеИдентификатор, Коллекция, Инструкции, Место)
 	// Хранит оператор цикла "Для Каждого".
 	// Пример:
 	// <pre>
-	// Для Каждого Элемент // поле "Ident" хранит переменную.
-	//   Из Список Цикл    // поле "In" хранит выражение коллекции.
-	//     // поле "Body" хранит операторы в этом блоке
+	// Для Каждого Элемент // поле "Идентификатор" хранит переменную.
+	//   Из Список Цикл    // поле "Из" хранит выражение коллекции.
+	//     // поле "Инструкции" хранит операторы в этом блоке
 	// КонецЦикла
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Ident," // structure (IdentExpr)
-		"In,"    // structure (one of #Expressions)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.ForEachStmt, IdentExpr, Collection, Body, Place);
-EndFunction // ForEachStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"           // строка (один из Узлы)
+		"Идентификатор," // структура (ВыражениеИдентификатор)
+		"Из,"            // структура (один из #Выражения)
+		"Инструкции,"    // массив (один из #Инструкции)
+		"Место",         // число, структура (Место)
+		Узлы.ИнструкцияДляКаждого, ВыражениеИдентификатор, Коллекция, Инструкции, Место);
+КонецФункции // ИнструкцияДляКаждого()
 
-Function TryStmt(TryPart, ExceptPart, Place)
+Функция ИнструкцияПопытка(ПопыткаЧасть, ИсключениеЧасть, Место)
 	// Хранит оператор "Попытка"
 	// Пример:
 	// <pre>
 	// Попытка
-	//     // поле "Try" хранит операторы в этом блоке.
+	//     // поле "Попытка" хранит операторы в этом блоке.
 	// Исключение
-	//     // поле "Except" хранит операторы в этом блоке
+	//     // поле "Исключение" хранит операторы в этом блоке
 	// КонецПопытки
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"   // string (one of Nodes)
-		"Try,"    // array (one of #Statements)
-		"Except," // structure (ExceptStmt)
-		"Place",  // number, structure (Place)
-		Nodes.TryStmt, TryPart, ExceptPart, Place);
-EndFunction // TryStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Попытка,"    // массив (один из #Инструкции)
+		"Исключение," // структура (ИнструкцияИсключение)
+		"Место",      // число, структура (Место)
+		Узлы.ИнструкцияПопытка, ПопыткаЧасть, ИсключениеЧасть, Место);
+КонецФункции // ИнструкцияПопытка()
 
-Function ExceptStmt(Body, Place)
+Функция ИнструкцияИсключение(Инструкции, Место)
 	// Хранит блок "Исключение"
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Body,"  // array (one of #Statements)
-		"Place", // number, structure (Place)
-		Nodes.ExceptStmt, Body, Place);
-EndFunction // ExceptStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Инструкции," // массив (один из #Инструкции)
+		"Место",      // число, структура (Место)
+		Узлы.ИнструкцияИсключение, Инструкции, Место);
+КонецФункции // ИнструкцияИсключение()
 
-Function GotoStmt(Label, Place)
+Функция ИнструкцияПерейти(Метка, Место)
 	// Хранит оператор "Перейти"
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Label," // string
-		"Place", // number, structure (Place)
-		Nodes.GotoStmt, Label, Place);
-EndFunction // GotoStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Метка," // строка
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПерейти, Метка, Место);
+КонецФункции // ИнструкцияПерейти()
 
-Function LabelStmt(Label, Place)
+Функция ИнструкцияМетка(Метка, Место)
 	// Хранит оператор метки.
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Label," // string
-		"Place", // number, structure (Place)
-		Nodes.LabelStmt, Label, Place);
-EndFunction // LabelStmt()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Метка," // строка
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияМетка, Метка, Место);
+КонецФункции // ИнструкцияМетка()
 
-#EndRegion // Statements
+#КонецОбласти // Инструкции
 
-#Region PrepInst
+#Область ИнструкцияПрепроцессора
 
-Function PrepIfInst(Cond, Place)
+Функция ИнструкцияПрепроцессораЕсли(Условие, Место)
 	// Хранит информацию об инструкции препроцессора #Если,
 	// Пример:
 	// <pre>
 	// ...
-	// #Если Сервер Тогда // поле "Cond" хранит условие (выражение)
+	// #Если Сервер Тогда // поле "Условие" хранит условие (выражение)
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #PrepExpr)
-		"Place", // number, structure (Place)
-		Nodes.PrepIfInst, Cond, Place);
-EndFunction // PrepIfInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"     // строка (один из Узлы)
+		"Условие," // структура (один из #ВыражениеПрепроцессора)
+		"Место",   // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораЕсли, Условие, Место);
+КонецФункции // ИнструкцияПрепроцессораЕсли()
 
-Function PrepElsIfInst(Cond, Place)
+Функция ИнструкцияПрепроцессораИначеЕсли(Условие, Место)
 	// Хранит информацию об инструкции препроцессора #ИначеЕсли
 	// Пример:
 	// <pre>
 	// ...
-	// #ИначеЕсли Клиент Тогда // поле "Cond" хранит условие (выражение)
+	// #ИначеЕсли Клиент Тогда // поле "Условие" хранит условие (выражение)
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Cond,"  // structure (one of #PrepExpr)
-		"Place", // number, structure (Place)
-		Nodes.PrepElsIfInst, Cond, Place);
-EndFunction // PrepElsIfInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"     // строка (один из Узлы)
+		"Условие," // структура (один из #ВыражениеПрепроцессора)
+		"Место",   // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораИначеЕсли, Условие, Место);
+КонецФункции // ИнструкцияПрепроцессораИначеЕсли()
 
-Function PrepElseInst(Place)
+Функция ИнструкцияПрепроцессораИначе(Место)
 	// Хранит информацию об инструкции препроцессора #Иначе
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.PrepElseInst, Place);
-EndFunction // PrepElseInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораИначе, Место);
+КонецФункции // ИнструкцияПрепроцессораИначе()
 
-Function PrepEndIfInst(Place)
+Функция ИнструкцияПрепроцессораКонецЕсли(Место)
 	// Хранит информацию об инструкции препроцессора #КонецЕсли
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.PrepEndIfInst, Place);
-EndFunction // PrepEndIfInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораКонецЕсли, Место);
+КонецФункции // ИнструкцияПрепроцессораКонецЕсли()
 
-Function PrepRegionInst(Name, Place)
+Функция ИнструкцияПрепроцессораОбласть(Имя, Место)
 	// Хранит информацию об инструкции препроцессора #Обрасть,
 	// Пример:
 	// <pre>
 	// ...
-	// #Область Интерфейс   // поле "Name" хранит имя области
+	// #Область Интерфейс   // поле "Имя" хранит имя области
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Name,"  // string
-		"Place", // number, structure (Place)
-		Nodes.PrepRegionInst, Name, Place);
-EndFunction // PrepRegionInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Имя,"   // строка
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораОбласть, Имя, Место);
+КонецФункции // ИнструкцияПрепроцессораОбласть()
 
-Function PrepEndRegionInst(Place)
+Функция ИнструкцияПрепроцессораКонецОбласти(Место)
 	// Хранит информацию об инструкции препроцессора #КонецОбласти,
 	// Пример:
 	// <pre>
@@ -956,50 +961,50 @@ Function PrepEndRegionInst(Place)
 	// #КонецОбласти
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Place", // number, structure (Place)
-		Nodes.PrepEndRegionInst, Place);
-EndFunction // PrepEndRegionInst()
+	Возврат Новый Структура( // @Node
+		"Тип,"   // строка (один из Узлы)
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораКонецОбласти, Место);
+КонецФункции // ИнструкцияПрепроцессораКонецОбласти()
 
-Function PrepUseInst(Path, Place)
+Функция ИнструкцияПрепроцессораИспользовать(Путь, Место)
 	// Хранит информацию об инструкции препроцессора #Использовать,
 	// Это нестандартная инструкция из OneScript
 	// Пример:
 	// <pre>
-	// #Использовать 1commands // поле "Path" хранит имя библиотеки или путь в кавычках
+	// #Использовать 1commands // поле "Путь" хранит имя библиотеки или путь в кавычках
 	// </pre>
-	Return New Structure( // @Node @OneScript
-		"Type,"  // string (one of Nodes)
-		"Path,"  // string
-		"Place", // number, structure (Place)
-		Nodes.PrepUseInst, Path, Place);
-EndFunction // PrepUseInst()
+	Возврат Новый Структура( // @Node @OneScript
+		"Тип,"   // строка (один из Узлы)
+		"Путь,"  // строка
+		"Место", // число, структура (Место)
+		Узлы.ИнструкцияПрепроцессораИспользовать, Путь, Место);
+КонецФункции // ИнструкцияПрепроцессораИспользовать()
 
-#EndRegion // PrepInst
+#КонецОбласти // ИнструкцияПрепроцессора
 
-#Region PrepExpr
+#Область ВыражениеПрепроцессора
 
-Function PrepBinaryExpr(Left, Operator, Right, Place)
+Функция ВыражениеПрепроцессораБинарное(Левый, Оператор, Правый, Место)
 	// Хранит бинарное выражение препроцессора.
 	// Пример:
 	// <pre>
 	// // бинарные выражения заключены в скобки <...>
-	// // поле "Operator" равно либо Tokens.Or либо Tokens.And:
-	// // поля "Left" и "Right" содержат операнды-выражения препроцессора
+	// // поле "Оператор" равно либо Токены.Или либо Токены.И:
+	// // поля "Левый" и "Правый" содержат операнды-выражения препроцессора
 	// #Если <Сервер Или ВнешнееСоединение> Тогда
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"     // string (one of Nodes)
-		"Left,"     // structure (one of #PrepExpr)
-		"Operator," // string (one of Tokens)
-		"Right,"    // structure (one of #PrepExpr)
-		"Place",    // number, structure (Place)
-		Nodes.PrepBinaryExpr, Left, Operator, Right, Place);
-EndFunction // PrepBinaryExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"      // строка (один из Узлы)
+		"Левый,"    // структура (один из #ВыражениеПрепроцессора)
+		"Оператор," // строка (один из Токены)
+		"Правый,"   // структура (один из #ВыражениеПрепроцессора)
+		"Место",    // число, структура (Место)
+		Узлы.ВыражениеПрепроцессораБинарное, Левый, Оператор, Правый, Место);
+КонецФункции // ВыражениеПрепроцессораБинарное()
 
-Function PrepNotExpr(Expr, Place)
+Функция ВыражениеПрепроцессораНе(Выражение, Место)
 	// Хранит выражение препроцессора, к которому применено логическое отрицание "Не".
 	// Пример:
 	// <pre>
@@ -1007,2214 +1012,2214 @@ Function PrepNotExpr(Expr, Place)
 	// #Если <Не ВебКлиент> Тогда
 	// ...
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"  // string (one of Nodes)
-		"Expr,"  // structure (one of #PrepExpr)
-		"Place", // number, structure (Place)
-		Nodes.PrepNotExpr, Expr, Place);
-EndFunction // PrepNotExpr()
+	Возврат Новый Структура( // @Node
+		"Тип,"       // строка (один из Узлы)
+		"Выражение," // структура (один из #ВыражениеПрепроцессора)
+		"Место",     // число, структура (Место)
+		Узлы.ВыражениеПрепроцессораНе, Выражение, Место);
+КонецФункции // ВыражениеПрепроцессораНе()
 
-Function PrepSymExpr(Symbol, Exist, Place)
+Функция ВыражениеПрепроцессораСимвол(Символ, Существует, Место)
 	// Узел хранит информацию о символе препроцессора.
-	// Поле Exist = True если такой символ существует.
+	// Поле Существует = Истина если такой символ существует.
 	// Пример:
 	// <pre>
 	// // символ заключен в скобки <...>
 	// #Если <Сервер> Тогда
 	// </pre>
-	Return New Structure( // @Node
-		"Type,"   // string (one of Nodes)
-		"Symbol," // string (one of PrepSymbols)
-		"Exist,"  // boolean
-		"Place",  // number, structure (Place)
-		Nodes.PrepSymExpr, Symbol, Exist, Place);
-EndFunction // PrepSymExpr()
-
-#EndRegion // PrepExpr
-
-#EndRegion // AbstractSyntaxTree
-
-#Region Parser
-
-Function Scan()
-	Var Beg, Prev, Comment;
-
-	Parser_EndPos = Parser_CurPos;
-	Parser_EndLine = Parser_CurLine;
-
-	If Right(Parser_Lit, 1) = Chars_LF Then
-		Parser_CurLine = Parser_CurLine + 1;
-	EndIf;
-
-	While True Do
-
-		Comment = False;
-
-		// skip space
-		While IsBlankString(Parser_Char) And Parser_Char <> "" Do
-			If Parser_Char = Chars_LF Then
-				Parser_CurLine = Parser_CurLine + 1;
-			EndIf;
-			Parser_CurPos = Parser_CurPos + 1;
-			Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-		EndDo;
-
-		Parser_BegPos = Parser_CurPos;
-
-		Parser_Tok = TokenMap[Parser_Char];
-		If Parser_Tok = Alpha Then
-
-			// scan ident
-			Beg = Parser_CurPos;
-			Parser_CurPos = Parser_CurPos + 1;
-			While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Undefined Do
-				Parser_CurPos = Parser_CurPos + 1;
-			EndDo;
-			Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-			Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-
-			// lookup
-			If Not Keywords.Property(Parser_Lit, Parser_Tok) Then
-				Parser_Tok = Tokens.Ident;
-			EndIf;
-
-		ElsIf Parser_Tok = Tokens.String Then
-
-			Beg = Parser_CurPos;
-			Parser_Char = """"; // cheat code
-			While Parser_Char = """" Do
-				Parser_CurPos = Parser_CurPos + 1;
-				Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				While Parser_Char <> """" And Parser_Char <> Chars_LF And Parser_Char <> "" Do
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				EndDo;
-				If Parser_Char <> "" Then
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				EndIf;
-			EndDo;
-			Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-
-			Parser_Tok = StringToken(Parser_Lit);
-
-		ElsIf Parser_Tok = Digit Then
-
-			Beg = Parser_CurPos;
-			Parser_CurPos = Parser_CurPos + 1;
-			While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] = Digit Do
-				Parser_CurPos = Parser_CurPos + 1;
-			EndDo;
-			Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-			If Parser_Char = "." Then
-				Parser_CurPos = Parser_CurPos + 1;
-				While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] = Digit Do
-					Parser_CurPos = Parser_CurPos + 1;
-				EndDo;
-				Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-			EndIf;
-			Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-
-			Parser_Tok = Tokens.Number;
-
-		ElsIf Parser_Tok = Tokens.DateTime Then
-
-			Parser_CurPos = Parser_CurPos + 1;
-			Beg = Parser_CurPos;
-			Parser_CurPos = StrFind(Parser_Source, "'",, Parser_CurPos);
-			If Parser_CurPos = 0 Then
-				Parser_Char = "";
-			Else
-				Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-				Parser_CurPos = Parser_CurPos + 1;
-				Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-			EndIf;
-
-		ElsIf Parser_Tok = Undefined Then
-
-			Prev = Parser_Char;
-			Parser_CurPos = Parser_CurPos + 1;
-			Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-
-			If Prev = "/" Then
-
-				If Parser_Char = "/" Then
-					// scan comment
-					Beg = Parser_CurPos + 1;
-					Parser_CurPos = StrFind(Parser_Source, Chars_LF,, Beg);
-					Parser_Comments[Parser_CurLine] = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-					If Parser_CurPos = 0 Then
-						Parser_Char = "";
-					Else
-						Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-					EndIf;
-					Comment = True;
-				Else
-					Parser_Tok = Tokens.Div;
-				EndIf;
-
-			ElsIf Prev = "<" Then
-
-				If Parser_Char = ">" Then
-					Parser_Tok = Tokens.Neq;
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				ElsIf Parser_Char = "=" Then
-					Parser_Tok = Tokens.Leq;
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				Else
-					Parser_Tok = Tokens.Lss;
-				EndIf;
-
-			ElsIf Prev = ">" Then
-
-				If Parser_Char = "=" Then
-					Parser_Tok = Tokens.Geq;
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				Else
-					Parser_Tok = Tokens.Gtr;
-				EndIf;
-
-			ElsIf Prev = "&" Then
-
-				If AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Alpha Then
-					Error("Expected directive", Parser_CurPos, True);
-				EndIf;
-
-				// scan ident
-				Beg = Parser_CurPos;
-				Parser_CurPos = Parser_CurPos + 1;
-				While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Undefined Do
-					Parser_CurPos = Parser_CurPos + 1;
-				EndDo;
-				Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-
-				If Not Directives.Property(Parser_Lit) Then
-					Error(StrTemplate("Unknown directive: '%1'", Parser_Lit));
-				EndIf;
-
-				Parser_Tok = Tokens.Directive;
-
-			ElsIf Prev = "#" Then
-
-				// skip space
-				While IsBlankString(Parser_Char) And Parser_Char <> "" Do
-					If Parser_Char = Chars_LF Then
-						Parser_CurLine = Parser_CurLine + 1;
-					EndIf;
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				EndDo;
-
-				If AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Alpha Then
-					Error("Expected preprocessor instruction", Parser_CurPos, True);
-				EndIf;
-
-				// scan ident
-				Beg = Parser_CurPos;
-				Parser_CurPos = Parser_CurPos + 1;
-				While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Undefined Do
-					Parser_CurPos = Parser_CurPos + 1;
-				EndDo;
-				Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-
-				// match token
-				If PrepInstructions.Property(Parser_Lit, Parser_Tok) Then
-					Parser_Tok = "_" + Parser_Tok;
-				Else
-					Error(StrTemplate("Unknown preprocessor instruction: '%1'", Parser_Lit));
-				EndIf;
-
-			ElsIf Prev = "~" Then
-
-				// skip space
-				While IsBlankString(Parser_Char) And Parser_Char <> "" Do
-					If Parser_Char = Chars_LF Then
-						Parser_CurLine = Parser_CurLine + 1;
-					EndIf;
-					Parser_CurPos = Parser_CurPos + 1;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-				EndDo;
-
-				If AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] = Undefined Then
-					Parser_Lit = "";
-				Else
-					// scan ident
-					Beg = Parser_CurPos; Parser_CurPos = Parser_CurPos + 1;
-					While AlphaDigitMap[Mid(Parser_Source, Parser_CurPos, 1)] <> Undefined Do
-						Parser_CurPos = Parser_CurPos + 1;
-					EndDo;
-					Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-					Parser_Lit = Mid(Parser_Source, Beg, Parser_CurPos - Beg);
-				EndIf;
-
-				Parser_Tok = Tokens.Label;
-
-			Else
-
-				Raise "Unknown char!";
-
-			EndIf;
-
-		Else
-
-			Parser_CurPos = Parser_CurPos + 1;
-			Parser_Char = Mid(Parser_Source, Parser_CurPos, 1);
-
-		EndIf;
-
-		If Not Comment Then
-			Break;
-		EndIf;
-
-	EndDo;
-
-	If Parser_Tok = Tokens.Number Then
-		Parser_Val = Number(Parser_Lit);
-	ElsIf Parser_Tok = Tokens.True Then
-		Parser_Val = True;
-	ElsIf Parser_Tok = Tokens.False Then
-		Parser_Val = False;
-	ElsIf Parser_Tok = Tokens.DateTime Then
-		Parser_Val = AsDate(Parser_Lit);
-	ElsIf Left(Parser_Tok, 6) = Tokens.String Then
-		Parser_Val = Mid(Parser_Lit, 2, StrLen(Parser_Lit) - 2);
-	ElsIf Parser_Tok = Tokens.Null Then
-		Parser_Val = Null;
-	Else
-		Parser_Val = Undefined;
-	EndIf;
-
-	Return Parser_Tok;
-
-EndFunction // Next()
-
-Function FindObject(Name)
-	Var Scope, Object;
-	Scope = Parser_Scope;
-	Scope.Objects.Property(Name, Object);
-	While Object = Undefined And Scope.Outer <> Undefined Do
-		Scope = Scope.Outer;
-		Scope.Objects.Property(Name, Object);
-	EndDo;
-	Return Object;
-EndFunction // FindObject()
-
-Function OpenScope()
-	Var Scope;
-	Scope = Scope(Parser_Scope);
-	Parser_Scope = Scope;
-	Parser_Vars = Scope.Objects;
-	Return Scope;
-EndFunction // OpenScope()
-
-Function CloseScope()
-	Var Scope;
-	Scope = Parser_Scope.Outer;
-	Parser_Scope = Scope;
-	Parser_Vars = Scope.Objects;
-	Return Scope;
-EndFunction // CloseScope()
-
-Function ParseModule(Source) Export
-	Var Decls, Auto, VarObj, Item, Statements, Module;
-	Parser_Source = Source;
-	Parser_CurPos = 0;
-	Parser_CurLine = 1;
-	Parser_EndLine = 1;
-	Parser_BegPos = 0;
-	Parser_EndPos = 0;
-	Parser_Methods = New Structure;
-	Parser_Unknown = New Structure;
-	Parser_IsFunc = False;
-	Parser_AllowVar = True;
-	Parser_Interface = New Array;
-	Parser_Comments = New Map;
-	Parser_Len = StrLen(Source);
-	Parser_Lit = "";
-	Parser_Char = Undefined;
-	OpenScope();
-	Scan();
-	Decls = ParseModDecls();
-	Statements = ParseStatements();
-	Auto = New Array;
-	For Each VarObj In Parser_Scope.Auto Do
-		Auto.Add(VarObj);
-	EndDo;
-	Module = Module(Decls, Auto, Statements, Parser_Interface, Parser_Comments);
-	If Verbose Then
-		For Each Item In Parser_Unknown Do
-			Message(StrTemplate("Undeclared method `%1`", Item.Key));
-		EndDo;
-	EndIf;
-	Expect(Tokens.Eof);
-	Parser_Unknown = Undefined;
-	Parser_Methods = Undefined;
-	Parser_Directive = Undefined;
-	Parser_Interface = Undefined;
-	Parser_Comments = Undefined;
-	Parser_Scope = Undefined;
-	Parser_Vars = Undefined;
-	Parser_Source = Undefined;
-	Return Module;
-EndFunction // ParseModule()
-
-#Region ParseExpr
-
-Function ParseExpression()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParseAndExpr();
-	While Parser_Tok = Tokens.Or Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = BinaryExpr(Expr, Operator, ParseAndExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParseExpression()
-
-Function ParseAndExpr()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParseNotExpr();
-	While Parser_Tok = Tokens.And Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = BinaryExpr(Expr, Operator, ParseNotExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParseAndExpr()
-
-Function ParseNotExpr()
-	Var Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	If Parser_Tok = Tokens.Not Then
-		Scan();
-		Expr = NotExpr(ParseRelExpr(), Place(Pos, Line));
-	Else
-		Expr = ParseRelExpr();
-	EndIf;
-	Return Expr;
-EndFunction // ParseNotExpr()
-
-Function ParseRelExpr()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParseAddExpr();
-	While RelOperators.Find(Parser_Tok) <> Undefined Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = BinaryExpr(Expr, Operator, ParseAddExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParseRelExpr()
-
-Function ParseAddExpr()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParseMulExpr();
-	While AddOperators.Find(Parser_Tok) <> Undefined Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = BinaryExpr(Expr, Operator, ParseMulExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParseAddExpr()
-
-Function ParseMulExpr()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParseUnaryExpr();
-	While MulOperators.Find(Parser_Tok) <> Undefined Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = BinaryExpr(Expr, Operator, ParseUnaryExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParseMulExpr()
-
-Function ParseUnaryExpr()
-	Var Operator, Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Operator = Parser_Tok;
-	If AddOperators.Find(Parser_Tok) <> Undefined Then
-		Scan();
-		Expr = UnaryExpr(Operator, ParseOperand(), Place(Pos, Line));
-	ElsIf Parser_Tok = Tokens.Eof Then
-		Expr = Undefined;
-	Else
-		Expr = ParseOperand();
-	EndIf;
-	Return Expr;
-EndFunction // ParseUnaryExpr()
-
-Function ParseOperand()
-	Var Tok, Operand;
-	Tok = Parser_Tok;
-	If Tok = Tokens.String Or Tok = Tokens.StringBeg Then
-		Operand = ParseStringExpr();
-	ElsIf BasicLitNoString.Find(Tok) <> Undefined Then
-		Operand = BasicLitExpr(Tok, Parser_Val, Place());
-		Scan();
-	ElsIf Tok = Tokens.Ident Then
-		Operand = ParseIdentExpr();
-	ElsIf Tok = Tokens.Lparen Then
-		Operand = ParseParenExpr();
-	ElsIf Tok = Tokens.New Then
-		Operand = ParseNewExpr();
-	ElsIf Tok = Tokens.Ternary Then
-		Operand = ParseTernaryExpr();
-	Else
-		Error("Expected operand",, True);
-	EndIf;
-	Return Operand;
-EndFunction // ParseOperand()
-
-Function ParseStringExpr()
-	Var Tok, ExprList, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Tok = Parser_Tok;
-	ExprList = New Array;
-	While True Do
-		If Tok = Tokens.String Then
-			ExprList.Add(BasicLitExpr(Tok, Parser_Val, Place()));
-			Tok = Scan();
-			While Tok = Tokens.String Do
-				ExprList.Add(BasicLitExpr(Tok, Parser_Val, Place()));
-				Tok = Scan();
-			EndDo;
-		ElsIf Tok = Tokens.StringBeg Then
-			ExprList.Add(BasicLitExpr(Tok, Parser_Val, Place()));
-			Tok = Scan();
-			While Tok = Tokens.StringMid Do
-				ExprList.Add(BasicLitExpr(Tok, Parser_Val, Place()));
-				Tok = Scan();
-			EndDo;
-			If Tok <> Tokens.StringEnd Then
-				Error("Expected """,, True);
-			EndIf;
-			ExprList.Add(BasicLitExpr(Tok, Parser_Val, Place()));
-			Tok = Scan();
-		Else
-			Break;
-		EndIf;
-	EndDo;
-	Return StringExpr(ExprList, Place(Pos, Line));
-EndFunction // ParseStringExpr()
-
-Function ParseNewExpr()
-	Var Tok, Name, Args, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Tok = Scan();
-	If Tok = Tokens.Ident Then
-		Name = Parser_Lit;
-		Args = EmptyArray;
-		Tok = Scan();
-	EndIf;
-	If Tok = Tokens.Lparen Then
-		Tok = Scan();
-		If Tok <> Tokens.Rparen Then
-			Args = ParseArguments();
-			Expect(Tokens.Rparen);
-		EndIf;
-		Scan();
-	EndIf;
-	If Name = Undefined And Args = Undefined Then
-		Error("Expected constructor", Parser_EndPos, True);
-	EndIf;
-	Return NewExpr(Name, Args, Place(Pos, Line));
-EndFunction // ParseNewExpr()
-
-Function ParseIdentExpr(Val AllowNewVar = False, NewVar = Undefined, Call = Undefined)
-	Var Name, Object, Tail, Args, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Name = Parser_Lit;
-	AutoPlace = Place();
-	Scan();
-	If Parser_Tok = Tokens.Lparen Then
-		If Scan() = Tokens.Rparen Then
-			Args = EmptyArray;
-		Else
-			Args = ParseArguments();
-		EndIf;
-		Expect(Tokens.Rparen);
-		Scan();
-		If Not Parser_Methods.Property(Name, Object) Then
-			If Not Parser_Unknown.Property(Name, Object) Then
-				Object = Object(Name);
-				Parser_Unknown.Insert(Name, Object);
-			EndIf;
-		EndIf;
-		Call = True;
-	Else
-		Object = FindObject(Name);
-		If Object = Undefined Then
-			If AllowNewVar Then
-				Object = Object(Name, AutoDecl(AutoPlace));
-				NewVar = Object;
-			Else
-				Object = Object(Name);
-				If Verbose Then
-					Error(StrTemplate("Undeclared identifier `%1`", Name), Pos);
-				EndIf;
-			EndIf;
-		EndIf;
-		Call = False;
-	EndIf;
-	Tail = ParseIdentTail(Call);
-	Return IdentExpr(Object, Tail, Args, Place(Pos, Line));
-EndFunction // ParseIdentExpr()
-
-Function ParseIdentTail(Call = Undefined)
-	Var Tail, Name, Args, Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Tail = New Array;
-	While True Do
-		If Parser_Tok = Tokens.Period Then
-			Scan();
-			If AlphaDigitMap[Left(Parser_Lit, 1)] <> Alpha Or Not Keywords.Property(Parser_Lit) Then
-				Expect(Tokens.Ident);
-			EndIf;
-			Name = Parser_Lit;
-			If Scan() = Tokens.Lparen Then
-				If Scan() = Tokens.Rparen Then
-					Args = EmptyArray;
-				Else
-					Args = ParseArguments();
-				EndIf;
-				Expect(Tokens.Rparen);
-				Scan();
-				Call = True;
-			Else
-				Args = Undefined;
-			EndIf;
-			Tail.Add(FieldExpr(Name, Args, Place(Pos, Line)));
-		ElsIf Parser_Tok = Tokens.Lbrack Then
-			Call = False;
-			If Scan() = Tokens.Rbrack Then
-				Error("Expected expression", Pos, True);
-			EndIf;
-			Expr = ParseExpression();
-			Expect(Tokens.Rbrack);
-			Scan();
-			Tail.Add(IndexExpr(Expr, Place(Pos, Line)));
-		Else
-			Break;
-		EndIf;
-	EndDo;
-	Return Tail;
-EndFunction // ParseIdentTail()
-
-Function ParseArguments()
-	Var ExprList;
-	ExprList = New Array;
-	While True Do
-		If InitOfExpression.Find(Parser_Tok) <> Undefined Then
-			ExprList.Add(ParseExpression());
-		Else
-			ExprList.Add(Undefined);
-		EndIf;
-		If Parser_Tok = Tokens.Comma Then
-			Scan();
-		Else
-			Break;
-		EndIf;
-	EndDo;
-	Return ExprList;
-EndFunction // ParseArguments()
-
-Function ParseTernaryExpr()
-	Var Cond, ThenPart, ElsePart, Tail, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Expect(Tokens.Lparen);
-	Scan();
-	Cond = ParseExpression();
-	Expect(Tokens.Comma);
-	Scan();
-	ThenPart = ParseExpression();
-	Expect(Tokens.Comma);
-	Scan();
-	ElsePart = ParseExpression();
-	Expect(Tokens.Rparen);
-	If Scan() = Tokens.Period Then
-		Tail = ParseIdentTail();
-	Else
-		Tail = EmptyArray;
-	EndIf;
-	Return TernaryExpr(Cond, ThenPart, ElsePart, Tail, Place(Pos, Line));
-EndFunction // ParseTernaryExpr()
-
-Function ParseParenExpr()
-	Var Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Expr = ParseExpression();
-	Expect(Tokens.Rparen);
-	Scan();
-	Return ParenExpr(Expr, Place(Pos, Line));
-EndFunction // ParseParenExpr()
-
-#EndRegion // ParseExpr
-
-#Region ParseDecl
-
-Function ParseModDecls()
-	Var Decls, Inst;
-	Decls = New Array;
-	While Parser_Tok = Tokens.Directive Do
-		Parser_Directive = Directives[Parser_Lit];
-		Parser_Tok = Scan();
-	EndDo;
-	While True Do
-		If Parser_Tok = Tokens.Var And Parser_AllowVar Then
-			Decls.Add(ParseVarModListDecl());
-		ElsIf Parser_Tok = Tokens.Function Then
-			Parser_IsFunc = True;
-			Decls.Add(ParseMethodDecl());
-			Parser_IsFunc = False;
-			Parser_AllowVar = False;
-		ElsIf Parser_Tok = Tokens.Procedure Then
-			Decls.Add(ParseMethodDecl());
-			Parser_AllowVar = False;
-		ElsIf Parser_Tok = Tokens._Region Then
-			Decls.Add(ParsePrepRegionInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._EndRegion Then
-			Decls.Add(ParsePrepEndRegionInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._If Then
-			Decls.Add(ParsePrepIfInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._ElsIf Then
-			Decls.Add(ParsePrepElsIfInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._Else Then
-			Decls.Add(ParsePrepElseInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._EndIf Then
-			Decls.Add(ParsePrepEndIfInst());
-			Scan();
-		ElsIf Parser_Tok = Tokens._Use Then
-			Decls.Add(ParsePrepUseInst());
-		Else
-			Break;
-		EndIf;
-		Parser_Directive = Undefined;
-		While Parser_Tok = Tokens.Directive Do
-			Parser_Directive = Directives[Parser_Lit];
-			Scan();
-		EndDo;
-	EndDo;
-	Return Decls;
-EndFunction // ParseModDecls()
-
-Function ParseVarModListDecl()
-	Var VarList, Decl, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	VarList = New Array;
-	VarList.Add(ParseVarModDecl());
-	While Parser_Tok = Tokens.Comma Do
-		Scan();
-		VarList.Add(ParseVarModDecl());
-	EndDo;
-	Decl = VarModListDecl(Parser_Directive, VarList, Place(Pos, Line));
-	Expect(Tokens.Semicolon);
-	Scan();
-	While Parser_Tok = Tokens.Semicolon Do
-		Scan();
-	EndDo;
-	Return Decl;
-EndFunction // ParseVarModListDecl()
-
-Function ParseVarModDecl()
-	Var Name, VarModDecl, Exported, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expect(Tokens.Ident);
-	Name = Parser_Lit;
-	If Scan() = Tokens.Export Then
-		Exported = True;
-		Scan();
-	Else
-		Exported = False;
-	EndIf;
-	VarModDecl = VarModDecl(Name, Parser_Directive, Exported, Place(Pos, Line));
-	If Exported Then
-		Parser_Interface.Add(VarModDecl);
-	EndIf;
-	If Parser_Vars.Property(Name) Then
-		Error("Identifier already declared", Pos, True);
-	EndIf;
-	Parser_Vars.Insert(Name, Object(Name, VarModDecl));
-	Return VarModDecl;
-EndFunction // ParseVarModDecl()
-
-Function ParseVars()
-	Var Tok, Decls;
-	Decls = New Array;
-	Tok = Parser_Tok;
-	While Tok = Tokens.Var Do
-		Scan();
-		Decls.Add(ParseVarLocDecl());
-		While Parser_Tok = Tokens.Comma Do
-			Scan();
-			Decls.Add(ParseVarLocDecl());
-		EndDo;
-		Expect(Tokens.Semicolon);
-		Tok = Scan();
-	EndDo;
-	Return Decls;
-EndFunction // ParseVars()
-
-Function ParseVarLocDecl()
-	Var Name, VarLocDecl, Pos;
-	Pos = Parser_BegPos;
-	Expect(Tokens.Ident);
-	Name = Parser_Lit;
-	VarLocDecl = VarLocDecl(Name, Place());
-	If Parser_Vars.Property(Name) Then
-		Error("Identifier already declared", Pos, True);
-	EndIf;
-	Parser_Vars.Insert(Name, Object(Name, VarLocDecl));
-	Scan();
-	Return VarLocDecl;
-EndFunction // ParseVarLocDecl()
-
-Function ParseMethodDecl()
-	Var Sign, Object, Name, Vars, Params, Exported, Body, Auto, VarObj, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Exported = False;
-	Scan();
-	Expect(Tokens.Ident);
-	Name = Parser_Lit;
-	Scan();
-	OpenScope();
-	Params = ParseParams();
-	If Parser_Tok = Tokens.Export Then
-		Exported = True;
-		Scan();
-	EndIf;
-	If Parser_IsFunc Then
-		Sign = FuncSign(Name, Parser_Directive, Params, Exported, Place(Pos, Line));
-	Else
-	    Sign = ProcSign(Name, Parser_Directive, Params, Exported, Place(Pos, Line));
-	EndIf;
-	If Parser_Unknown.Property(Name, Object) Then
-		Parser_Unknown.Delete(Name);
-		Object.Decl = Sign;
-	Else
-		Object = Object(Name, Sign);
-	EndIf;
-	If Parser_Methods.Property(Name) Then
-		Error("Method already declared", Pos, True);
-	EndIf;
-	Parser_Methods.Insert(Name, Object);
-	If Exported Then
-		Parser_Interface.Add(Object);
-	EndIf;
-	Vars = ParseVars();
-	Body = ParseStatements();
-	If Parser_IsFunc Then
-		Expect(Tokens.EndFunction);
-	Else
-	    Expect(Tokens.EndProcedure);
-	EndIf;
-	Auto = New Array;
-	For Each VarObj In Parser_Scope.Auto Do
-		Auto.Add(VarObj);
-	EndDo;
-	CloseScope();
-	Scan();
-	Return MethodDecl(Sign, Vars, Auto, Body, Place(Pos, Line));
-EndFunction // ParseMethodDecl()
-
-Function ParseParams()
-	Var Params;
-	Expect(Tokens.Lparen);
-	Scan();
-	If Parser_Tok = Tokens.Rparen Then
-		Params = EmptyArray;
-	Else
-		Params = New Array;
-		Params.Add(ParseParamDecl());
-		While Parser_Tok = Tokens.Comma Do
-			Scan();
-			Params.Add(ParseParamDecl());
-		EndDo;
-	EndIf;
-	Expect(Tokens.Rparen);
-	Scan();
-	Return Params;
-EndFunction // ParseParams()
-
-Function ParseParamDecl()
-	Var Name, ParamDecl, ByVal, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	If Parser_Tok = Tokens.Val Then
-		ByVal = True;
-		Scan();
-	Else
-		ByVal = False;
-	EndIf;
-	Expect(Tokens.Ident);
-	Name = Parser_Lit;
-	If Scan() = Tokens.Eql Then
-		Scan();
-		ParamDecl = ParamDecl(Name, ByVal, ParseUnaryExpr(), Place(Pos, Line));
-	Else
-		ParamDecl = ParamDecl(Name, ByVal,, Place(Pos, Line));
-	EndIf;
-	If Parser_Vars.Property(Name) Then
-		Error("Identifier already declared", Pos, True);
-	EndIf;
-	Parser_Vars.Insert(Name, Object(Name, ParamDecl));
-	Return ParamDecl;
-EndFunction // ParseParamDecl()
-
-#EndRegion // ParseDecl
-
-#Region ParseStmt
-
-Function ParseStatements()
-	Var Statements, Stmt;
-	Statements = New Array;
-	Stmt = ParseStmt();
-	If Stmt <> Undefined Then
-		Statements.Add(Stmt);
-	EndIf;
-	While True Do
-		If Parser_Tok = Tokens.Semicolon Then
-			Scan();
-		ElsIf Left(Parser_Tok, 1) <> "_" Then
-			Break;
-		EndIf;
-		Stmt = ParseStmt();
-		If Stmt <> Undefined Then
-			Statements.Add(Stmt);
-		EndIf;
-	EndDo;
-	Return Statements;
-EndFunction // ParseStatements()
-
-Function ParseStmt()
-	Var Tok, Stmt, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Tok = Parser_Tok;
-	If Tok = Tokens.Ident Then
-		Stmt = ParseAssignOrCallStmt();
-	ElsIf Tok = Tokens.If Then
-		Stmt = ParseIfStmt();
-	ElsIf Tok = Tokens.Try Then
-		Stmt = ParseTryStmt();
-	ElsIf Tok = Tokens.While Then
-		Stmt = ParseWhileStmt();
-	ElsIf Tok = Tokens.For Then
-		If Scan() = Tokens.Each Then
-			Stmt = ParseForEachStmt();
-		Else
-			Stmt = ParseForStmt();
-		EndIf;
-	ElsIf Tok = Tokens.Return Then
-		Stmt = ParseReturnStmt();
-	ElsIf Tok = Tokens.Break Then
-		Stmt = ParseBreakStmt();
-	ElsIf Tok = Tokens.Continue Then
-		Stmt = ParseContinueStmt();
-	ElsIf Tok = Tokens.Raise Then
-		Stmt = ParseRaiseStmt();
-	ElsIf Tok = Tokens.Execute Then
-		Stmt = ParseExecuteStmt();
-	ElsIf Tok = Tokens.Goto Then
-		Stmt = ParseGotoStmt();
-	ElsIf Tok = Tokens.Label Then
-		Stmt = ParseLabelStmt();
-	ElsIf Tok = Tokens._Region Then
-		Stmt = ParsePrepRegionInst();
-	ElsIf Tok = Tokens._EndRegion Then
-		Stmt = ParsePrepEndRegionInst();
-	ElsIf Tok = Tokens._If Then
-		Stmt = ParsePrepIfInst();
-	ElsIf Tok = Tokens._ElsIf Then
-		Stmt = ParsePrepElsIfInst();
-	ElsIf Tok = Tokens._Else Then
-		Stmt = ParsePrepElseInst();
-	ElsIf Tok = Tokens._EndIf Then
-		Stmt = ParsePrepEndIfInst();
-	ElsIf Tok = Tokens.Semicolon Then
-		// NOP
-	EndIf;
-	Return Stmt;
-EndFunction // ParseStmt()
-
-Function ParseRaiseStmt()
-	Var Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	If InitOfExpression.Find(Scan()) <> Undefined Then
-		Expr = ParseExpression();
-	EndIf;
-	Return RaiseStmt(Expr, Place(Pos, Line));
-EndFunction // ParseRaiseStmt()
-
-Function ParseExecuteStmt()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Return ExecuteStmt(ParseExpression(), Place(Pos, Line));
-EndFunction // ParseExecuteStmt()
-
-Function ParseAssignOrCallStmt()
-	Var Left, Call, Right, Stmt, NewVar, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Left = ParseIdentExpr(True, NewVar, Call);
-	If Call Then
-		Stmt = CallStmt(Left, Place(Pos, Line));
-	Else
-		Expect(Tokens.Eql);
-		Scan();
-		Right = ParseExpression();
-		If NewVar <> Undefined Then
-			Parser_Vars.Insert(NewVar.Name, NewVar);
-			Parser_Scope.Auto.Add(NewVar);
-		EndIf;
-		Stmt = AssignStmt(Left, Right, Place(Pos, Line));
-	EndIf;
-	Return Stmt;
-EndFunction // ParseAssignOrCallStmt()
-
-Function ParseIfStmt()
-	Var Cond, ThenPart, ElsePart, ElsIfPart, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Cond = ParseExpression();
-	Expect(Tokens.Then);
-	Scan();
-	ThenPart = ParseStatements();
-	If Parser_Tok = Tokens.ElsIf Then
-		ElsIfPart = New Array;
-		While Parser_Tok = Tokens.ElsIf Do
-			ElsIfPart.Add(ParseElsIfStmt());
-		EndDo;
-	EndIf;
-	If Parser_Tok = Tokens.Else Then
-		ElsePart = ParseElseStmt();
-	EndIf;
-	Expect(Tokens.EndIf);
-	Scan();
-	Return IfStmt(Cond, ThenPart, ElsIfPart, ElsePart, Place(Pos, Line));
-EndFunction // ParseIfStmt()
-
-Function ParseElsIfStmt()
-	Var ElsIfCond, ElsIfThen, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	ElsIfCond = ParseExpression();
-	Expect(Tokens.Then);
-	Scan();
-	ElsIfThen = ParseStatements();
-	Return ElsIfStmt(ElsIfCond, ElsIfThen, Place(Pos, Line));
-EndFunction // ParseElsIfStmt() 
-
-Function ParseElseStmt()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Return ElseStmt(ParseStatements(), Place(Pos, Line));
-EndFunction // ParseElseStmt() 
-
-Function ParseTryStmt()
-	Var TryPart, ExceptPart, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	TryPart = ParseStatements();
-	Expect(Tokens.Except);
-	ExceptPart = ParseExceptStmt();
-	Expect(Tokens.EndTry);
-	Scan();
-	Return TryStmt(TryPart, ExceptPart, Place(Pos, Line));
-EndFunction // ParseTryStmt()
-
-Function ParseExceptStmt()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Return ExceptStmt(ParseStatements(), Place(Pos, Line));
-EndFunction // ParseExceptStmt() 
-
-Function ParseWhileStmt()
-	Var Cond, Body, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Cond = ParseExpression();
-	Expect(Tokens.Do);
-	Scan();
-	Body = ParseStatements();
-	Expect(Tokens.EndDo);
-	Scan();
-	Return WhileStmt(Cond, Body, Place(Pos, Line));
-EndFunction // ParseWhileStmt()
-
-Function ParseForStmt()
-	Var IdentExpr, Call, From, Until, Body, VarPos, NewVar, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expect(Tokens.Ident);
-	VarPos = Parser_BegPos;
-	IdentExpr = ParseIdentExpr(True, NewVar, Call);
-	If Call Then
-		Error("Expected variable", VarPos, True);
-	EndIf;
-	Expect(Tokens.Eql);
-	Scan();
-	From = ParseExpression();
-	Expect(Tokens.To);
-	Scan();
-	Until = ParseExpression();
-	If NewVar <> Undefined Then
-		Parser_Vars.Insert(NewVar.Name, NewVar);
-		Parser_Scope.Auto.Add(NewVar);
-	EndIf;
-	Expect(Tokens.Do);
-	Scan();
-	Body = ParseStatements();
-	Expect(Tokens.EndDo);
-	Scan();
-	Return ForStmt(IdentExpr, From, Until, Body, Place(Pos, Line));
-EndFunction // ParseForStmt()
-
-Function ParseForEachStmt()
-	Var IdentExpr, Call, Collection, Body, VarPos, NewVar, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Expect(Tokens.Ident);
-	VarPos = Parser_BegPos;
-	IdentExpr = ParseIdentExpr(True, NewVar, Call);
-	If Call Then
-		Error("Expected variable", VarPos, True);
-	EndIf;
-	Expect(Tokens.In);
-	Scan();
-	Collection = ParseExpression();
-	If NewVar <> Undefined Then
-		Parser_Vars.Insert(NewVar.Name, NewVar);
-		Parser_Scope.Auto.Add(NewVar);
-	EndIf;
-	Expect(Tokens.Do);
-	Scan();
-	Body = ParseStatements();
-	Expect(Tokens.EndDo);
-	Scan();
-	Return ForEachStmt(IdentExpr, Collection, Body, Place(Pos, Line));
-EndFunction // ParseForEachStmt()
-
-Function ParseGotoStmt()
-	Var Label, Pos, Line;
-	Scan();
-	Expect(Tokens.Label);
-	Label = Parser_Lit;
-	Scan();
-	Return GotoStmt(Label, Place(Pos, Line));
-EndFunction // ParseGotoStmt()
-
-Function ParseReturnStmt()
-	Var Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	If Parser_IsFunc Then
-		Expr = ParseExpression();
-	EndIf;
-	Return ReturnStmt(Expr, Place(Pos, Line));
-EndFunction // ParseReturnStmt()
-
-Function ParseBreakStmt()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Return BreakStmt(Place(Pos, Line));
-EndFunction // ParseBreakStmt()
-
-Function ParseContinueStmt()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Return ContinueStmt(Place(Pos, Line));
-EndFunction // ParseContinueStmt()
-
-Function ParseLabelStmt()
-	Var Pos, Line, Label;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Label = Parser_Lit;
-	Scan();
-	Expect(Tokens.Colon);
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return LabelStmt(Label, Place(Pos, Line));
-EndFunction // ParseLabelStmt() 
-
-#EndRegion // ParseStmt
-
-#Region ParsePrep
-
-// Expr
-
-Function ParsePrepExpression()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParsePrepAndExpr();
-	While Parser_Tok = Tokens.Or Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = PrepBinaryExpr(Expr, Operator, ParsePrepAndExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParsePrepExpression()
-
-Function ParsePrepAndExpr()
-	Var Expr, Operator, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Expr = ParsePrepNotExpr();
-	While Parser_Tok = Tokens.And Do
-		Operator = Parser_Tok;
-		Scan();
-		Expr = PrepBinaryExpr(Expr, Operator, ParsePrepNotExpr(), Place(Pos, Line));
-	EndDo;
-	Return Expr;
-EndFunction // ParsePrepAndExpr()
-
-Function ParsePrepNotExpr()
-	Var Expr, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	If Parser_Tok = Tokens.Not Then
-		Scan();
-		Expr = PrepNotExpr(ParsePrepSymExpr(), Place(Pos, Line));
-	Else
-		Expr = ParsePrepSymExpr();
-	EndIf;
-	Return Expr;
-EndFunction // ParsePrepNotExpr()
-
-Function ParsePrepSymExpr()
-	Var Operand, SymbolExist;
-	If Parser_Tok = Tokens.Ident Then
-		SymbolExist = PrepSymbols.Property(Parser_Lit);
-		Operand = PrepSymExpr(Parser_Lit, SymbolExist, Place());
-		Scan();
-	Else
-		Error("Expected preprocessor symbol",, True);
-	EndIf;
-	Return Operand;
-EndFunction // ParsePrepSymExpr()
-
-// Inst
-
-Function ParsePrepUseInst()
-	Var Path, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	If Line <> Parser_CurLine Then
-		Error("Expected string or identifier", Parser_EndPos, True);
-	EndIf;
-	If Parser_Tok = Tokens.Number Then
-		Path = Parser_Lit;
-		If AlphaDigitMap[Parser_Char] = Alpha Then // can be a keyword
-			Scan();
-			Path = Path + Parser_Lit;
-		EndIf;
-	ElsIf Parser_Tok = Tokens.Ident
-		Or Parser_Tok = Tokens.String Then
-		Path = Parser_Lit;
-	Else
-		Error("Expected string or identifier", Parser_EndPos, True);
-	EndIf;
-	Scan();
-	Return PrepUseInst(Path, Place(Pos, Line));
-EndFunction // ParsePrepUseInst()
-
-Function ParsePrepIfInst()
-	Var Cond, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Cond = ParsePrepExpression();
-	Expect(Tokens.Then);
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepIfInst(Cond, Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepIfInst()
-
-Function ParsePrepElsIfInst()
-	Var Cond, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Cond = ParsePrepExpression();
-	Expect(Tokens.Then);
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepElsIfInst(Cond, Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepElsIfInst()
-
-Function ParsePrepElseInst()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepElseInst(Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepElseInst() 
-
-Function ParsePrepEndIfInst()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepEndIfInst(Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepEndIfInst()
-
-Function ParsePrepRegionInst()
-	Var Name, Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Scan();
-	Expect(Tokens.Ident);
-	Name = Parser_Lit;
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepRegionInst(Name, Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepRegionInst()
-
-Function ParsePrepEndRegionInst()
-	Var Pos, Line;
-	Pos = Parser_BegPos;
-	Line = Parser_CurLine;
-	Parser_Tok = Tokens.Semicolon; // cheat code
-	Return PrepEndRegionInst(Place(Pos, Line, Parser_CurPos - Pos));
-EndFunction // ParsePrepEndRegionInst()
-
-#EndRegion // ParsePrep
-
-#EndRegion // Parser
-
-#Region Auxiliary
-
-Function Place(Pos = Undefined, Line = Undefined, Len = Undefined)
-	Var Place;
-	If Location Then
-		If Pos = Undefined Then
-			Len = StrLen(Parser_Lit);
-			Pos = Parser_CurPos - Len;
-		ElsIf Len = Undefined Then
-			Len = Parser_EndPos - Pos;
-		EndIf;
-		If Line = Undefined Then
-			Line = Parser_CurLine;
-		EndIf;
-		Place = New Structure(
-			"Pos,"     // number
-			"Len,"     // number
-			"BegLine," // number
-			"EndLine", // number
-			Pos, Len, Line, Parser_EndLine);
-		If Debug Then
-			Place.Insert("Str", Mid(Parser_Source, Pos, Len));
-		EndIf;
-	Else
-		Place = Line;
-	EndIf;
-	Return Place;
-EndFunction // Place()
-
-Function AsDate(DateLit)
-	Var List, Char, Num, DateString;
-	List = New Array;
-	For Num = 1 To StrLen(DateLit) Do
-		Char = Mid(DateLit, Num, 1);
-		If AlphaDigitMap[Char] = Digit Then
-			List.Add(Char);
-		EndIf;
-	EndDo;
-	DateString = StrConcat(List);
-	If DateString = "00000000"
-		Or DateString = "000000000000"
-		Or DateString = "00000000000000" Then
-		Return '00010101';
-	EndIf;
-	Return Date(DateString);
-EndFunction // AsDate()
-
-Procedure Expect(Tok)
-	If Parser_Tok <> Tok Then
-		Error("Expected " + Tok,, True);
-	EndIf;
-EndProcedure // Expect()
-
-Function StringToken(Lit)
-	Var Tok;
-	If Left(Lit, 1) = """" Then
-		If Right(Lit, 1) = """" Then
-			Tok = Tokens.String;
-		Else
-			Tok = Tokens.StringBeg;
-		EndIf;
-	Else // |
-		If Right(Lit, 1) = """" Then
-			Tok = Tokens.StringEnd;
-		Else
-			Tok = Tokens.StringMid;
-		EndIf;
-	EndIf;
-	Return Tok;
-EndFunction // StringToken()
-
-Procedure Error(Note, Pos = Undefined, Stop = False)
-	Var ErrorText;
-	If Pos = Undefined Then
-		Pos = Min(Parser_CurPos - StrLen(Parser_Lit), Parser_Len);
-	EndIf;
-	ErrorText = StrTemplate("[ Ln: %1; Col: %2 ] %3",
-		StrOccurrenceCount(Mid(Parser_Source, 1, Pos), Chars_LF) + 1,
-		Pos - ?(Pos = 0, 0, StrFind(Parser_Source, Chars_LF, SearchDirection.FromEnd, Pos)),
-		Note
+	Возврат Новый Структура( // @Node
+		"Тип,"        // строка (один из Узлы)
+		"Символ,"     // строка (один из PrepСимволы)
+		"Существует," // булево
+		"Место",      // число, структура (Место)
+		Узлы.ВыражениеПрепроцессораСимвол, Символ, Существует, Место);
+КонецФункции // ВыражениеПрепроцессораСимвол()
+
+#КонецОбласти // ВыражениеПрепроцессора
+
+#КонецОбласти // АбстрактноеСинтаксическоеДерево
+
+#Область Парсер
+
+Функция СледующийТокен()
+	Перем ПозицияНачала, ПредыдущийСимвол, Комментарий;
+
+	Парсер_ПозицияОкончания = Парсер_ТекущаяПозиция;
+	Парсер_НомерСтрокиОкончания = Парсер_ТекущийНомерСтроки;
+
+	Если Прав(Парсер_Литерал, 1) = ПереводСтроки Тогда
+		Парсер_ТекущийНомерСтроки = Парсер_ТекущийНомерСтроки + 1;
+	КонецЕсли;
+
+	Пока Истина Цикл
+
+		Комментарий = Ложь;
+
+		// пропуск невидимых символов
+		Пока ПустаяСтрока(Парсер_Символ) И Парсер_Символ <> "" Цикл
+			Если Парсер_Символ = ПереводСтроки Тогда
+				Парсер_ТекущийНомерСтроки = Парсер_ТекущийНомерСтроки + 1;
+			КонецЕсли;
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+		КонецЦикла;
+
+		Парсер_ПозицияНачала = Парсер_ТекущаяПозиция;
+
+		Парсер_Токен = КартаТокенов[Парсер_Символ];
+		Если Парсер_Токен = Буква Тогда
+
+			// анализ идентификатора
+			ПозицияНачала = Парсер_ТекущаяПозиция;
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Неопределено Цикл
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			КонецЦикла;
+			Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+			Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+
+			// сопоставление токена
+			Если Не КлючевыеСлова.Свойство(Парсер_Литерал, Парсер_Токен) Тогда
+				Парсер_Токен = Токены.Идентификатор;
+			КонецЕсли;
+
+		ИначеЕсли Парсер_Токен = Токены.Строка Тогда
+
+			ПозицияНачала = Парсер_ТекущаяПозиция;
+			Парсер_Символ = """"; // лазейка
+			Пока Парсер_Символ = """" Цикл
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				Пока Парсер_Символ <> """" И Парсер_Символ <> ПереводСтроки И Парсер_Символ <> "" Цикл
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				КонецЦикла;
+				Если Парсер_Символ <> "" Тогда
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				КонецЕсли;
+			КонецЦикла;
+			Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+
+			Парсер_Токен = ТокенСтроки(Парсер_Литерал);
+
+		ИначеЕсли Парсер_Токен = Цифра Тогда
+
+			ПозицияНачала = Парсер_ТекущаяПозиция;
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] = Цифра Цикл
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			КонецЦикла;
+			Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+			Если Парсер_Символ = "." Тогда
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] = Цифра Цикл
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				КонецЦикла;
+				Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+			КонецЕсли;
+			Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+
+			Парсер_Токен = Токены.Число;
+
+		ИначеЕсли Парсер_Токен = Токены.ДатаВремя Тогда
+
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			ПозицияНачала = Парсер_ТекущаяПозиция;
+			Парсер_ТекущаяПозиция = СтрНайти(Парсер_Исходник, "'", , Парсер_ТекущаяПозиция);
+			Если Парсер_ТекущаяПозиция = 0 Тогда
+				Парсер_Символ = "";
+			Иначе
+				Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+			КонецЕсли;
+
+		ИначеЕсли Парсер_Токен = Неопределено Тогда
+
+			ПредыдущийСимвол = Парсер_Символ;
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+
+			Если ПредыдущийСимвол = "/" Тогда
+
+				Если Парсер_Символ = "/" Тогда
+					// анализ комментария
+					ПозицияНачала = Парсер_ТекущаяПозиция + 1;
+					Парсер_ТекущаяПозиция = СтрНайти(Парсер_Исходник, ПереводСтроки, , ПозицияНачала);
+					Парсер_Комментарии[Парсер_ТекущийНомерСтроки] = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+					Если Парсер_ТекущаяПозиция = 0 Тогда
+						Парсер_Символ = "";
+					Иначе
+						Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+					КонецЕсли;
+					Комментарий = Истина;
+				Иначе
+					Парсер_Токен = Токены.Деление;
+				КонецЕсли;
+
+			ИначеЕсли ПредыдущийСимвол = "<" Тогда
+
+				Если Парсер_Символ = ">" Тогда
+					Парсер_Токен = Токены.НеРавно;
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				ИначеЕсли Парсер_Символ = "=" Тогда
+					Парсер_Токен = Токены.МеньшеИлиРавно;
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				Иначе
+					Парсер_Токен = Токены.Меньше;
+				КонецЕсли;
+
+			ИначеЕсли ПредыдущийСимвол = ">" Тогда
+
+				Если Парсер_Символ = "=" Тогда
+					Парсер_Токен = Токены.БольшеИлиРавно;
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				Иначе
+					Парсер_Токен = Токены.Больше;
+				КонецЕсли;
+
+			ИначеЕсли ПредыдущийСимвол = "&" Тогда
+
+				Если КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Буква Тогда
+					Ошибка("Ожидается директива", Парсер_ТекущаяПозиция, Истина);
+				КонецЕсли;
+
+				// анализ идентификатора
+				ПозицияНачала = Парсер_ТекущаяПозиция;
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Неопределено Цикл
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				КонецЦикла;
+				Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+
+				Если Не Директивы.Свойство(Парсер_Литерал) Тогда
+					Ошибка(СтрШаблон("Неизвестная директива: '%1'", Парсер_Литерал));
+				КонецЕсли;
+
+				Парсер_Токен = Токены.Директива;
+
+			ИначеЕсли ПредыдущийСимвол = "#" Тогда
+
+				// пропуск невидимых символов
+				Пока ПустаяСтрока(Парсер_Символ) И Парсер_Символ <> "" Цикл
+					Если Парсер_Символ = ПереводСтроки Тогда
+						Парсер_ТекущийНомерСтроки = Парсер_ТекущийНомерСтроки + 1;
+					КонецЕсли;
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				КонецЦикла;
+
+				Если КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Буква Тогда
+					Ошибка("Ожидается инструкция препроцессора", Парсер_ТекущаяПозиция, Истина);
+				КонецЕсли;
+
+				// анализ идентификатора
+				ПозицияНачала = Парсер_ТекущаяПозиция;
+				Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Неопределено Цикл
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+				КонецЦикла;
+				Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+
+				// сопоставление токена
+				Если ИнструкцииПрепроцессора.Свойство(Парсер_Литерал, Парсер_Токен) Тогда
+					Парсер_Токен = "_" + Парсер_Токен;
+				Иначе
+					Ошибка(СтрШаблон("Неизвестная инструкция препроцессора: '%1'", Парсер_Литерал));
+				КонецЕсли;
+
+			ИначеЕсли ПредыдущийСимвол = "~" Тогда
+
+				// пропуск невидимых символов
+				Пока ПустаяСтрока(Парсер_Символ) И Парсер_Символ <> "" Цикл
+					Если Парсер_Символ = ПереводСтроки Тогда
+						Парсер_ТекущийНомерСтроки = Парсер_ТекущийНомерСтроки + 1;
+					КонецЕсли;
+					Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+				КонецЦикла;
+
+				Если КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] = Неопределено Тогда
+					Парсер_Литерал = "";
+				Иначе
+					// анализ идентификатора
+					ПозицияНачала = Парсер_ТекущаяПозиция;Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					Пока КартаБуквЦифр[Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1)] <> Неопределено Цикл
+						Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+					КонецЦикла;
+					Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+					Парсер_Литерал = Сред(Парсер_Исходник, ПозицияНачала, Парсер_ТекущаяПозиция - ПозицияНачала);
+				КонецЕсли;
+
+				Парсер_Токен = Токены.Метка;
+
+			Иначе
+
+				ВызватьИсключение "Неизвестный символ!";
+
+			КонецЕсли;
+
+		Иначе
+
+			Парсер_ТекущаяПозиция = Парсер_ТекущаяПозиция + 1;
+			Парсер_Символ = Сред(Парсер_Исходник, Парсер_ТекущаяПозиция, 1);
+
+		КонецЕсли;
+
+		Если Не Комментарий Тогда
+			Прервать;
+		КонецЕсли;
+
+	КонецЦикла;
+
+	Если Парсер_Токен = Токены.Число Тогда
+		Парсер_Значение = Число(Парсер_Литерал);
+	ИначеЕсли Парсер_Токен = Токены.Истина Тогда
+		Парсер_Значение = Истина;
+	ИначеЕсли Парсер_Токен = Токены.Ложь Тогда
+		Парсер_Значение = Ложь;
+	ИначеЕсли Парсер_Токен = Токены.ДатаВремя Тогда
+		Парсер_Значение = КакДата(Парсер_Литерал);
+	ИначеЕсли Лев(Парсер_Токен, 6) = Токены.Строка Тогда
+		Парсер_Значение = Сред(Парсер_Литерал, 2, СтрДлина(Парсер_Литерал) - 2);
+	ИначеЕсли Парсер_Токен = Токены.Null Тогда
+		Парсер_Значение = Null;
+	Иначе
+		Парсер_Значение = Неопределено;
+	КонецЕсли;
+
+	Возврат Парсер_Токен;
+
+КонецФункции // СледующийТокен()
+
+Функция НайтиОбъект(Имя)
+	Перем Окружение, Объект;
+	Окружение = Парсер_Окружение;
+	Окружение.Объекты.Свойство(Имя, Объект);
+	Пока Объект = Неопределено И Окружение.Внешний <> Неопределено Цикл
+		Окружение = Окружение.Внешний;
+		Окружение.Объекты.Свойство(Имя, Объект);
+	КонецЦикла;
+	Возврат Объект;
+КонецФункции // НайтиОбъект()
+
+Функция ОткрытьОкружение()
+	Перем Окружение;
+	Окружение = Окружение(Парсер_Окружение);
+	Парсер_Окружение = Окружение;
+	Парсер_Переменные = Окружение.Объекты;
+	Возврат Окружение;
+КонецФункции // ОткрытьОкружение()
+
+Функция ЗакрытьОкружение()
+	Перем Окружение;
+	Окружение = Парсер_Окружение.Внешний;
+	Парсер_Окружение = Окружение;
+	Парсер_Переменные = Окружение.Объекты;
+	Возврат Окружение;
+КонецФункции // ЗакрытьОкружение()
+
+Функция РазобратьМодуль(Исходник) Экспорт
+	Перем Объявления, Авто, ОбъектПеременной, Элемент, Инструкции, Модуль;
+	Парсер_Исходник = Исходник;
+	Парсер_ТекущаяПозиция = 0;
+	Парсер_ТекущийНомерСтроки = 1;
+	Парсер_НомерСтрокиОкончания = 1;
+	Парсер_ПозицияНачала = 0;
+	Парсер_ПозицияОкончания = 0;
+	Парсер_Методы = Новый Структура;
+	Парсер_Неизвестные = Новый Структура;
+	Парсер_ЭтоФункция = Ложь;
+	Парсер_РазрешеныПерем = Истина;
+	Парсер_ПрограммныйИнтерфейс = Новый Массив;
+	Парсер_Комментарии = Новый Соответствие;
+	Парсер_Длина = СтрДлина(Исходник);
+	Парсер_Литерал = "";
+	Парсер_Символ = Неопределено;
+	ОткрытьОкружение();
+	СледующийТокен();
+	Объявления = РазобратьОстатокОбъявления();
+	Инструкции = РазобратьИнструкции();
+	Авто = Новый Массив;
+	Для Каждого ОбъектПеременной Из Парсер_Окружение.Авто Цикл
+		Авто.Добавить(ОбъектПеременной);
+	КонецЦикла;
+	Модуль = Модуль(Объявления, Авто, Инструкции, Парсер_ПрограммныйИнтерфейс, Парсер_Комментарии);
+	Если БолтливыйРежим Тогда
+		Для Каждого Элемент Из Парсер_Неизвестные Цикл
+			Сообщить(СтрШаблон("Необъявленный метод `%1`", Элемент.Key));
+		КонецЦикла;
+	КонецЕсли;
+	Ожидается(Токены.КонецФайла);
+	Парсер_Неизвестные = Неопределено;
+	Парсер_Методы = Неопределено;
+	Парсер_Директива = Неопределено;
+	Парсер_ПрограммныйИнтерфейс = Неопределено;
+	Парсер_Комментарии = Неопределено;
+	Парсер_Окружение = Неопределено;
+	Парсер_Переменные = Неопределено;
+	Парсер_Исходник = Неопределено;
+	Возврат Модуль;
+КонецФункции // РазобратьМодуль()
+
+#Область РазборВыражений
+
+Функция РазобратьВыражение()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеИ();
+	Пока Парсер_Токен = Токены.Или Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеБинарное(Выражение, Оператор, РазобратьВыражениеИ(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражение()
+
+Функция РазобратьВыражениеИ()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеНе();
+	Пока Парсер_Токен = Токены.И Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеБинарное(Выражение, Оператор, РазобратьВыражениеНе(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеИ()
+
+Функция РазобратьВыражениеНе()
+	Перем Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Если Парсер_Токен = Токены.Не Тогда
+		СледующийТокен();
+		Выражение = ВыражениеНе(РазобратьВыражениеСравнения(), Место(Позиция, НомерСтроки));
+	Иначе
+		Выражение = РазобратьВыражениеСравнения();
+	КонецЕсли;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеНе()
+
+Функция РазобратьВыражениеСравнения()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеСложения();
+	Пока ОператорыСравнения.Найти(Парсер_Токен) <> Неопределено Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеБинарное(Выражение, Оператор, РазобратьВыражениеСложения(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеСравнения()
+
+Функция РазобратьВыражениеСложения()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеУмножения();
+	Пока ОператорыСложения.Найти(Парсер_Токен) <> Неопределено Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеБинарное(Выражение, Оператор, РазобратьВыражениеУмножения(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеСложения()
+
+Функция РазобратьВыражениеУмножения()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеУнарное();
+	Пока ОператорыУмножения.Найти(Парсер_Токен) <> Неопределено Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеБинарное(Выражение, Оператор, РазобратьВыражениеУнарное(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеУмножения()
+
+Функция РазобратьВыражениеУнарное()
+	Перем Оператор, Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Оператор = Парсер_Токен;
+	Если ОператорыСложения.Найти(Парсер_Токен) <> Неопределено Тогда
+		СледующийТокен();
+		Выражение = ВыражениеУнарное(Оператор, РазобратьОперанд(), Место(Позиция, НомерСтроки));
+	ИначеЕсли Парсер_Токен = Токены.КонецФайла Тогда
+		Выражение = Неопределено;
+	Иначе
+		Выражение = РазобратьОперанд();
+	КонецЕсли;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеУнарное()
+
+Функция РазобратьОперанд()
+	Перем Токен, Операнд;
+	Токен = Парсер_Токен;
+	Если Токен = Токены.Строка Или Токен = Токены.СтрокаНачало Тогда
+		Операнд = РазобратьВыражениеСтрока();
+	ИначеЕсли ОсновнойЛитералКромеСтроки.Найти(Токен) <> Неопределено Тогда
+		Операнд = ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место());
+		СледующийТокен();
+	ИначеЕсли Токен = Токены.Идентификатор Тогда
+		Операнд = РазобратьВыражениеИдентификатор();
+	ИначеЕсли Токен = Токены.ЛеваяКруглаяСкобка Тогда
+		Операнд = РазобратьВыражениеСкобки();
+	ИначеЕсли Токен = Токены.New Тогда
+		Операнд = РазобратьВыражениеНовый();
+	ИначеЕсли Токен = Токены.ЗнакВопроса Тогда
+		Операнд = РазобратьВыражениеТернарное();
+	Иначе
+		Ошибка("Ожидается операнд", , Истина);
+	КонецЕсли;
+	Возврат Операнд;
+КонецФункции // РазобратьОперанд()
+
+Функция РазобратьВыражениеСтрока()
+	Перем Токен, ВыражениеСписок, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Токен = Парсер_Токен;
+	ВыражениеСписок = Новый Массив;
+	Пока Истина Цикл
+		Если Токен = Токены.Строка Тогда
+			ВыражениеСписок.Добавить(ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место()));
+			Токен = СледующийТокен();
+			Пока Токен = Токены.Строка Цикл
+				ВыражениеСписок.Добавить(ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место()));
+				Токен = СледующийТокен();
+			КонецЦикла;
+		ИначеЕсли Токен = Токены.СтрокаНачало Тогда
+			ВыражениеСписок.Добавить(ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место()));
+			Токен = СледующийТокен();
+			Пока Токен = Токены.СтрокаПродолжение Цикл
+				ВыражениеСписок.Добавить(ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место()));
+				Токен = СледующийТокен();
+			КонецЦикла;
+			Если Токен <> Токены.СтрокаОкончание Тогда
+				Ошибка("Ожидается """, , Истина);
+			КонецЕсли;
+			ВыражениеСписок.Добавить(ВыражениеОсновнойЛитерал(Токен, Парсер_Значение, Место()));
+			Токен = СледующийТокен();
+		Иначе
+			Прервать;
+		КонецЕсли;
+	КонецЦикла;
+	Возврат ВыражениеСтрока(ВыражениеСписок, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьВыражениеСтрока()
+
+Функция РазобратьВыражениеНовый()
+	Перем Токен, Имя, Аргументы, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Токен = СледующийТокен();
+	Если Токен = Токены.Идентификатор Тогда
+		Имя = Парсер_Литерал;
+		Аргументы = ПустойМассив;
+		Токен = СледующийТокен();
+	КонецЕсли;
+	Если Токен = Токены.ЛеваяКруглаяСкобка Тогда
+		Токен = СледующийТокен();
+		Если Токен <> Токены.ПраваяКруглаяСкобка Тогда
+			Аргументы = РазобратьАргументы();
+			Ожидается(Токены.ПраваяКруглаяСкобка);
+		КонецЕсли;
+		СледующийТокен();
+	КонецЕсли;
+	Если Имя = Неопределено И Аргументы = Неопределено Тогда
+		Ошибка("Ожидается конструктор", Парсер_ПозицияОкончания, Истина);
+	КонецЕсли;
+	Возврат ВыражениеНовый(Имя, Аргументы, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьВыражениеНовый()
+
+Функция РазобратьВыражениеИдентификатор(Знач РазрешитьНовуюПеременную = Ложь, НоваяПеременная = Неопределено, Вызов = Неопределено)
+	Перем Имя, Объект, Хвост, Аргументы, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Имя = Парсер_Литерал;
+	АвтоМесто = Место();
+	СледующийТокен();
+	Если Парсер_Токен = Токены.ЛеваяКруглаяСкобка Тогда
+		Если СледующийТокен() = Токены.ПраваяКруглаяСкобка Тогда
+			Аргументы = ПустойМассив;
+		Иначе
+			Аргументы = РазобратьАргументы();
+		КонецЕсли;
+		Ожидается(Токены.ПраваяКруглаяСкобка);
+		СледующийТокен();
+		Если Не Парсер_Методы.Свойство(Имя, Объект) Тогда
+			Если Не Парсер_Неизвестные.Свойство(Имя, Объект) Тогда
+				Объект = Объект(Имя);
+				Парсер_Неизвестные.Вставить(Имя, Объект);
+			КонецЕсли;
+		КонецЕсли;
+		Вызов = Истина;
+	Иначе
+		Объект = НайтиОбъект(Имя);
+		Если Объект = Неопределено Тогда
+			Если РазрешитьНовуюПеременную Тогда
+				Объект = Объект(Имя, ОбъявлениеАвтоПеременной(АвтоМесто));
+				НоваяПеременная = Объект;
+			Иначе
+				Объект = Объект(Имя);
+				Если БолтливыйРежим Тогда
+					Ошибка(СтрШаблон("Необъявленный идентификатор `%1`", Имя), Позиция);
+				КонецЕсли;
+			КонецЕсли;
+		КонецЕсли;
+		Вызов = Ложь;
+	КонецЕсли;
+	Хвост = РазобратьХвост(Вызов);
+	Возврат ВыражениеИдентификатор(Объект, Хвост, Аргументы, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьВыражениеИдентификатор()
+
+Функция РазобратьХвост(Вызов = Неопределено)
+	Перем Хвост, Имя, Аргументы, Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Хвост = Новый Массив;
+	Пока Истина Цикл
+		Если Парсер_Токен = Токены.Точка Тогда
+			СледующийТокен();
+			Если КартаБуквЦифр[Лев(Парсер_Литерал, 1)] <> Буква Или Не КлючевыеСлова.Свойство(Парсер_Литерал) Тогда
+				Ожидается(Токены.Идентификатор);
+			КонецЕсли;
+			Имя = Парсер_Литерал;
+			Если СледующийТокен() = Токены.ЛеваяКруглаяСкобка Тогда
+				Если СледующийТокен() = Токены.ПраваяКруглаяСкобка Тогда
+					Аргументы = ПустойМассив;
+				Иначе
+					Аргументы = РазобратьАргументы();
+				КонецЕсли;
+				Ожидается(Токены.ПраваяКруглаяСкобка);
+				СледующийТокен();
+				Вызов = Истина;
+			Иначе
+				Аргументы = Неопределено;
+			КонецЕсли;
+			Хвост.Добавить(ВыражениеПоле(Имя, Аргументы, Место(Позиция, НомерСтроки)));
+		ИначеЕсли Парсер_Токен = Токены.ЛеваяКвадратнаяСкобка Тогда
+			Вызов = Ложь;
+			Если СледующийТокен() = Токены.ПраваяКвадратнаяСкобка Тогда
+				Ошибка("Ожидается выражение", Позиция, Истина);
+			КонецЕсли;
+			Выражение = РазобратьВыражение();
+			Ожидается(Токены.ПраваяКвадратнаяСкобка);
+			СледующийТокен();
+			Хвост.Добавить(ВыражениеИндекс(Выражение, Место(Позиция, НомерСтроки)));
+		Иначе
+			Прервать;
+		КонецЕсли;
+	КонецЦикла;
+	Возврат Хвост;
+КонецФункции // РазобратьХвост()
+
+Функция РазобратьАргументы()
+	Перем ВыражениеСписок;
+	ВыражениеСписок = Новый Массив;
+	Пока Истина Цикл
+		Если ТокеныНачалаВыражения.Найти(Парсер_Токен) <> Неопределено Тогда
+			ВыражениеСписок.Добавить(РазобратьВыражение());
+		Иначе
+			ВыражениеСписок.Добавить(Неопределено);
+		КонецЕсли;
+		Если Парсер_Токен = Токены.Запятая Тогда
+			СледующийТокен();
+		Иначе
+			Прервать;
+		КонецЕсли;
+	КонецЦикла;
+	Возврат ВыражениеСписок;
+КонецФункции // РазобратьАргументы()
+
+Функция РазобратьВыражениеТернарное()
+	Перем Условие, ТогдаЧасть, ИначеЧасть, Хвост, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Ожидается(Токены.ЛеваяКруглаяСкобка);
+	СледующийТокен();
+	Условие = РазобратьВыражение();
+	Ожидается(Токены.Запятая);
+	СледующийТокен();
+	ТогдаЧасть = РазобратьВыражение();
+	Ожидается(Токены.Запятая);
+	СледующийТокен();
+	ИначеЧасть = РазобратьВыражение();
+	Ожидается(Токены.ПраваяКруглаяСкобка);
+	Если СледующийТокен() = Токены.Точка Тогда
+		Хвост = РазобратьХвост();
+	Иначе
+		Хвост = ПустойМассив;
+	КонецЕсли;
+	Возврат ВыражениеТернарное(Условие, ТогдаЧасть, ИначеЧасть, Хвост, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьВыражениеТернарное()
+
+Функция РазобратьВыражениеСкобки()
+	Перем Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Выражение = РазобратьВыражение();
+	Ожидается(Токены.ПраваяКруглаяСкобка);
+	СледующийТокен();
+	Возврат ВыражениеСкобки(Выражение, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьВыражениеСкобки()
+
+#КонецОбласти // РазборВыражений
+
+#Область РазборОбъявлений
+
+Функция РазобратьОстатокОбъявления()
+	Перем Объявления, Изst;
+	Объявления = Новый Массив;
+	Пока Парсер_Токен = Токены.Директива Цикл
+		Парсер_Директива = Директивы[Парсер_Литерал];
+		Парсер_Токен = СледующийТокен();
+	КонецЦикла;
+	Пока Истина Цикл
+		Если Парсер_Токен = Токены.Перем И Парсер_РазрешеныПерем Тогда
+			Объявления.Добавить(РазобратьОбъявлениеСпискаПеременныхУровняМодуля());
+		ИначеЕсли Парсер_Токен = Токены.Функция Тогда
+			Парсер_ЭтоФункция = Истина;
+			Объявления.Добавить(РазобратьОбъявлениеМетода());
+			Парсер_ЭтоФункция = Ложь;
+			Парсер_РазрешеныПерем = Ложь;
+		ИначеЕсли Парсер_Токен = Токены.Процедура Тогда
+			Объявления.Добавить(РазобратьОбъявлениеМетода());
+			Парсер_РазрешеныПерем = Ложь;
+		ИначеЕсли Парсер_Токен = Токены._Область Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораОбласть());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._КонецОбласти Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораКонецОбласти());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._Если Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораЕсли());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._ИначеЕсли Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораИначеЕсли());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._Иначе Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораИначе());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._КонецЕсли Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораКонецЕсли());
+			СледующийТокен();
+		ИначеЕсли Парсер_Токен = Токены._Использовать Тогда
+			Объявления.Добавить(РазобратьИнструкциюПрепроцессораИспользовать());
+		Иначе
+			Прервать;
+		КонецЕсли;
+		Парсер_Директива = Неопределено;
+		Пока Парсер_Токен = Токены.Директива Цикл
+			Парсер_Директива = Директивы[Парсер_Литерал];
+			СледующийТокен();
+		КонецЦикла;
+	КонецЦикла;
+	Возврат Объявления;
+КонецФункции // РазобратьОстатокОбъявления()
+
+Функция РазобратьОбъявлениеСпискаПеременныхУровняМодуля()
+	Перем СписокПеременных, Объявление, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	СписокПеременных = Новый Массив;
+	СписокПеременных.Добавить(РазобратьОбъявлениеПеременнойУровняМодуля());
+	Пока Парсер_Токен = Токены.Запятая Цикл
+		СледующийТокен();
+		СписокПеременных.Добавить(РазобратьОбъявлениеПеременнойУровняМодуля());
+	КонецЦикла;
+	Объявление = ОбъявлениеСпискаПеременныхУровняМодуля(Парсер_Директива, СписокПеременных, Место(Позиция, НомерСтроки));
+	Ожидается(Токены.ТочкаСЗапятой);
+	СледующийТокен();
+	Пока Парсер_Токен = Токены.ТочкаСЗапятой Цикл
+		СледующийТокен();
+	КонецЦикла;
+	Возврат Объявление;
+КонецФункции // РазобратьОбъявлениеСпискаПеременныхУровняМодуля()
+
+Функция РазобратьОбъявлениеПеременнойУровняМодуля()
+	Перем Имя, ОбъявлениеПеременнойУровняМодуля, Экспортировано, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Ожидается(Токены.Идентификатор);
+	Имя = Парсер_Литерал;
+	Если СледующийТокен() = Токены.Экспорт Тогда
+		Экспортировано = Истина;
+		СледующийТокен();
+	Иначе
+		Экспортировано = Ложь;
+	КонецЕсли;
+	ОбъявлениеПеременнойУровняМодуля = ОбъявлениеПеременнойУровняМодуля(Имя, Парсер_Директива, Экспортировано, Место(Позиция, НомерСтроки));
+	Если Экспортировано Тогда
+		Парсер_ПрограммныйИнтерфейс.Добавить(ОбъявлениеПеременнойУровняМодуля);
+	КонецЕсли;
+	Если Парсер_Переменные.Свойство(Имя) Тогда
+		Ошибка("Идентификатор уже объявлен", Позиция, Истина);
+	КонецЕсли;
+	Парсер_Переменные.Вставить(Имя, Объект(Имя, ОбъявлениеПеременнойУровняМодуля));
+	Возврат ОбъявлениеПеременнойУровняМодуля;
+КонецФункции // РазобратьОбъявлениеПеременнойУровняМодуля()
+
+Функция РазобратьПеременные()
+	Перем Токен, Объявления;
+	Объявления = Новый Массив;
+	Токен = Парсер_Токен;
+	Пока Токен = Токены.Перем Цикл
+		СледующийТокен();
+		Объявления.Добавить(РазобратьОбъявлениеЛокальнойПеременной());
+		Пока Парсер_Токен = Токены.Запятая Цикл
+			СледующийТокен();
+			Объявления.Добавить(РазобратьОбъявлениеЛокальнойПеременной());
+		КонецЦикла;
+		Ожидается(Токены.ТочкаСЗапятой);
+		Токен = СледующийТокен();
+	КонецЦикла;
+	Возврат Объявления;
+КонецФункции // РазобратьПеременные()
+
+Функция РазобратьОбъявлениеЛокальнойПеременной()
+	Перем Имя, ОбъявлениеЛокальнойПеременной, Позиция;
+	Позиция = Парсер_ПозицияНачала;
+	Ожидается(Токены.Идентификатор);
+	Имя = Парсер_Литерал;
+	ОбъявлениеЛокальнойПеременной = ОбъявлениеЛокальнойПеременной(Имя, Место());
+	Если Парсер_Переменные.Свойство(Имя) Тогда
+		Ошибка("Идентификатор уже объявлен", Позиция, Истина);
+	КонецЕсли;
+	Парсер_Переменные.Вставить(Имя, Объект(Имя, ОбъявлениеЛокальнойПеременной));
+	СледующийТокен();
+	Возврат ОбъявлениеЛокальнойПеременной;
+КонецФункции // РазобратьОбъявлениеЛокальнойПеременной()
+
+Функция РазобратьОбъявлениеМетода()
+	Перем Сигнатура, Объект, Имя, Переменные, Параметры, Экспортировано, Инструкции, Авто, ОбъектПеременной, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Экспортировано = Ложь;
+	СледующийТокен();
+	Ожидается(Токены.Идентификатор);
+	Имя = Парсер_Литерал;
+	СледующийТокен();
+	ОткрытьОкружение();
+	Параметры = РазобратьПараметры();
+	Если Парсер_Токен = Токены.Экспорт Тогда
+		Экспортировано = Истина;
+		СледующийТокен();
+	КонецЕсли;
+	Если Парсер_ЭтоФункция Тогда
+		Сигнатура = СигнатураФункции(Имя, Парсер_Директива, Параметры, Экспортировано, Место(Позиция, НомерСтроки));
+	Иначе
+		Сигнатура = СигнатураПроцедуры(Имя, Парсер_Директива, Параметры, Экспортировано, Место(Позиция, НомерСтроки));
+	КонецЕсли;
+	Если Парсер_Неизвестные.Свойство(Имя, Объект) Тогда
+		Парсер_Неизвестные.Delete(Имя);
+		Объект.Объявление = Сигнатура;
+	Иначе
+		Объект = Объект(Имя, Сигнатура);
+	КонецЕсли;
+	Если Парсер_Методы.Свойство(Имя) Тогда
+		Ошибка("Метод уже объявлен", Позиция, Истина);
+	КонецЕсли;
+	Парсер_Методы.Вставить(Имя, Объект);
+	Если Экспортировано Тогда
+		Парсер_ПрограммныйИнтерфейс.Добавить(Объект);
+	КонецЕсли;
+	Переменные = РазобратьПеременные();
+	Инструкции = РазобратьИнструкции();
+	Если Парсер_ЭтоФункция Тогда
+		Ожидается(Токены.КонецФункции);
+	Иначе
+		Ожидается(Токены.КонецПроцедуры);
+	КонецЕсли;
+	Авто = Новый Массив;
+	Для Каждого ОбъектПеременной Из Парсер_Окружение.Авто Цикл
+		Авто.Добавить(ОбъектПеременной);
+	КонецЦикла;
+	ЗакрытьОкружение();
+	СледующийТокен();
+	Возврат ОбъявлениеМетода(Сигнатура, Переменные, Авто, Инструкции, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьОбъявлениеМетода()
+
+Функция РазобратьПараметры()
+	Перем Параметры;
+	Ожидается(Токены.ЛеваяКруглаяСкобка);
+	СледующийТокен();
+	Если Парсер_Токен = Токены.ПраваяКруглаяСкобка Тогда
+		Параметры = ПустойМассив;
+	Иначе
+		Параметры = Новый Массив;
+		Параметры.Добавить(РазобратьОбъявлениеПараметра());
+		Пока Парсер_Токен = Токены.Запятая Цикл
+			СледующийТокен();
+			Параметры.Добавить(РазобратьОбъявлениеПараметра());
+		КонецЦикла;
+	КонецЕсли;
+	Ожидается(Токены.ПраваяКруглаяСкобка);
+	СледующийТокен();
+	Возврат Параметры;
+КонецФункции // РазобратьПараметры()
+
+Функция РазобратьОбъявлениеПараметра()
+	Перем Имя, ОбъявлениеПараметра, ПоЗначению, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Если Парсер_Токен = Токены.Знач Тогда
+		ПоЗначению = Истина;
+		СледующийТокен();
+	Иначе
+		ПоЗначению = Ложь;
+	КонецЕсли;
+	Ожидается(Токены.Идентификатор);
+	Имя = Парсер_Литерал;
+	Если СледующийТокен() = Токены.Равенство Тогда
+		СледующийТокен();
+		ОбъявлениеПараметра = ОбъявлениеПараметра(Имя, ПоЗначению, РазобратьВыражениеУнарное(), Место(Позиция, НомерСтроки));
+	Иначе
+		ОбъявлениеПараметра = ОбъявлениеПараметра(Имя, ПоЗначению, , Место(Позиция, НомерСтроки));
+	КонецЕсли;
+	Если Парсер_Переменные.Свойство(Имя) Тогда
+		Ошибка("Идентификатор уже объявлен", Позиция, Истина);
+	КонецЕсли;
+	Парсер_Переменные.Вставить(Имя, Объект(Имя, ОбъявлениеПараметра));
+	Возврат ОбъявлениеПараметра;
+КонецФункции // РазобратьОбъявлениеПараметра()
+
+#КонецОбласти // РазборОбъявлений
+
+#Область РазборИнструкций
+
+Функция РазобратьИнструкции()
+	Перем Инструкции, Инструкция;
+	Инструкции = Новый Массив;
+	Инструкция = РазобратьИнструкцию();
+	Если Инструкция <> Неопределено Тогда
+		Инструкции.Добавить(Инструкция);
+	КонецЕсли;
+	Пока Истина Цикл
+		Если Парсер_Токен = Токены.ТочкаСЗапятой Тогда
+			СледующийТокен();
+		ИначеЕсли Лев(Парсер_Токен, 1) <> "_" Тогда
+			Прервать;
+		КонецЕсли;
+		Инструкция = РазобратьИнструкцию();
+		Если Инструкция <> Неопределено Тогда
+			Инструкции.Добавить(Инструкция);
+		КонецЕсли;
+	КонецЦикла;
+	Возврат Инструкции;
+КонецФункции // РазобратьИнструкции()
+
+Функция РазобратьИнструкцию()
+	Перем Токен, Инструкция, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Токен = Парсер_Токен;
+	Если Токен = Токены.Идентификатор Тогда
+		Инструкция = РазобратьПрисваиваниеИлиВызов();
+	ИначеЕсли Токен = Токены.Если Тогда
+		Инструкция = РазобратьИнструкциюЕсли();
+	ИначеЕсли Токен = Токены.Попытка Тогда
+		Инструкция = РазобратьИнструкциюПопытка();
+	ИначеЕсли Токен = Токены.Пока Тогда
+		Инструкция = РазобратьИнструкциюПока();
+	ИначеЕсли Токен = Токены.Для Тогда
+		Если СледующийТокен() = Токены.Каждого Тогда
+			Инструкция = РазобратьИнструкциюДляКаждого();
+		Иначе
+			Инструкция = РазобратьИнструкциюДля();
+		КонецЕсли;
+	ИначеЕсли Токен = Токены.Возврат Тогда
+		Инструкция = РазобратьИнструкциюВозврат();
+	ИначеЕсли Токен = Токены.Прервать Тогда
+		Инструкция = РазобратьИнструкциюПрервать();
+	ИначеЕсли Токен = Токены.Продолжить Тогда
+		Инструкция = РазобратьИнструкциюПродолжить();
+	ИначеЕсли Токен = Токены.ВызватьИсключение Тогда
+		Инструкция = РазобратьИнструкциюВызватьИсключение();
+	ИначеЕсли Токен = Токены.Выполнить Тогда
+		Инструкция = РазобратьИнструкциюВыполнить();
+	ИначеЕсли Токен = Токены.Перейти Тогда
+		Инструкция = РазобратьИнструкциюПерейти();
+	ИначеЕсли Токен = Токены.Метка Тогда
+		Инструкция = РазобратьИнструкциюМетка();
+	ИначеЕсли Токен = Токены._Область Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораОбласть();
+	ИначеЕсли Токен = Токены._КонецОбласти Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораКонецОбласти();
+	ИначеЕсли Токен = Токены._Если Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораЕсли();
+	ИначеЕсли Токен = Токены._ИначеЕсли Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораИначеЕсли();
+	ИначеЕсли Токен = Токены._Иначе Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораИначе();
+	ИначеЕсли Токен = Токены._КонецЕсли Тогда
+		Инструкция = РазобратьИнструкциюПрепроцессораКонецЕсли();
+	ИначеЕсли Токен = Токены.ТочкаСЗапятой Тогда
+		// пропуск
+	КонецЕсли;
+	Возврат Инструкция;
+КонецФункции // РазобратьИнструкцию()
+
+Функция РазобратьИнструкциюВызватьИсключение()
+	Перем Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Если ТокеныНачалаВыражения.Найти(СледующийТокен()) <> Неопределено Тогда
+		Выражение = РазобратьВыражение();
+	КонецЕсли;
+	Возврат ИнструкцияВызватьИсключение(Выражение, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюВызватьИсключение()
+
+Функция РазобратьИнструкциюВыполнить()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Возврат ИнструкцияВыполнить(РазобратьВыражение(), Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюВыполнить()
+
+Функция РазобратьПрисваиваниеИлиВызов()
+	Перем Левый, Вызов, Правый, Инструкция, НоваяПеременная, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Левый = РазобратьВыражениеИдентификатор(Истина, НоваяПеременная, Вызов);
+	Если Вызов Тогда
+		Инструкция = ИнструкцияВызвать(Левый, Место(Позиция, НомерСтроки));
+	Иначе
+		Ожидается(Токены.Равенство);
+		СледующийТокен();
+		Правый = РазобратьВыражение();
+		Если НоваяПеременная <> Неопределено Тогда
+			Парсер_Переменные.Вставить(НоваяПеременная.Имя, НоваяПеременная);
+			Парсер_Окружение.Авто.Добавить(НоваяПеременная);
+		КонецЕсли;
+		Инструкция = ИнструкцияПрисваивания(Левый, Правый, Место(Позиция, НомерСтроки));
+	КонецЕсли;
+	Возврат Инструкция;
+КонецФункции // РазобратьПрисваиваниеИлиВызов()
+
+Функция РазобратьИнструкциюЕсли()
+	Перем Условие, ТогдаЧасть, ИначеЧасть, ИначеЕслиЧасть, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Условие = РазобратьВыражение();
+	Ожидается(Токены.Тогда);
+	СледующийТокен();
+	ТогдаЧасть = РазобратьИнструкции();
+	Если Парсер_Токен = Токены.ИначеЕсли Тогда
+		ИначеЕслиЧасть = Новый Массив;
+		Пока Парсер_Токен = Токены.ИначеЕсли Цикл
+			ИначеЕслиЧасть.Добавить(РазобратьИнструкциюИначеЕсли());
+		КонецЦикла;
+	КонецЕсли;
+	Если Парсер_Токен = Токены.Иначе Тогда
+		ИначеЧасть = РазобратьИнструкциюИначе();
+	КонецЕсли;
+	Ожидается(Токены.КонецЕсли);
+	СледующийТокен();
+	Возврат ИнструкцияЕсли(Условие, ТогдаЧасть, ИначеЕслиЧасть, ИначеЧасть, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюЕсли()
+
+Функция РазобратьИнструкциюИначеЕсли()
+	Перем ИначеЕслиУсловие, ИначеЕслиТогда, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	ИначеЕслиУсловие = РазобратьВыражение();
+	Ожидается(Токены.Тогда);
+	СледующийТокен();
+	ИначеЕслиТогда = РазобратьИнструкции();
+	Возврат ИнструкцияИначеЕсли(ИначеЕслиУсловие, ИначеЕслиТогда, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюИначеЕсли()
+
+Функция РазобратьИнструкциюИначе()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Возврат ИнструкцияИначе(РазобратьИнструкции(), Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюИначе()
+
+Функция РазобратьИнструкциюПопытка()
+	Перем ПопыткаЧасть, ИсключениеЧасть, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	ПопыткаЧасть = РазобратьИнструкции();
+	Ожидается(Токены.Исключение);
+	ИсключениеЧасть = РазобратьИнструкциюИсключение();
+	Ожидается(Токены.КонецПопытки);
+	СледующийТокен();
+	Возврат ИнструкцияПопытка(ПопыткаЧасть, ИсключениеЧасть, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПопытка()
+
+Функция РазобратьИнструкциюИсключение()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Возврат ИнструкцияИсключение(РазобратьИнструкции(), Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюИсключение()
+
+Функция РазобратьИнструкциюПока()
+	Перем Условие, Инструкции, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Условие = РазобратьВыражение();
+	Ожидается(Токены.Цикл);
+	СледующийТокен();
+	Инструкции = РазобратьИнструкции();
+	Ожидается(Токены.КонецЦикла);
+	СледующийТокен();
+	Возврат ИнструкцияПока(Условие, Инструкции, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПока()
+
+Функция РазобратьИнструкциюДля()
+	Перем ВыражениеИдентификатор, Вызов, НачинаяС, До, Инструкции, ПеремПозиция, НоваяПеременная, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Ожидается(Токены.Идентификатор);
+	ПеремПозиция = Парсер_ПозицияНачала;
+	ВыражениеИдентификатор = РазобратьВыражениеИдентификатор(Истина, НоваяПеременная, Вызов);
+	Если Вызов Тогда
+		Ошибка("Ожидается переменная", ПеремПозиция, Истина);
+	КонецЕсли;
+	Ожидается(Токены.Равенство);
+	СледующийТокен();
+	НачинаяС = РазобратьВыражение();
+	Ожидается(Токены.По);
+	СледующийТокен();
+	До = РазобратьВыражение();
+	Если НоваяПеременная <> Неопределено Тогда
+		Парсер_Переменные.Вставить(НоваяПеременная.Имя, НоваяПеременная);
+		Парсер_Окружение.Авто.Добавить(НоваяПеременная);
+	КонецЕсли;
+	Ожидается(Токены.Цикл);
+	СледующийТокен();
+	Инструкции = РазобратьИнструкции();
+	Ожидается(Токены.КонецЦикла);
+	СледующийТокен();
+	Возврат ИнструкцияДля(ВыражениеИдентификатор, НачинаяС, До, Инструкции, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюДля()
+
+Функция РазобратьИнструкциюДляКаждого()
+	Перем ВыражениеИдентификатор, Вызов, Коллекция, Инструкции, ПеремПозиция, НоваяПеременная, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Ожидается(Токены.Идентификатор);
+	ПеремПозиция = Парсер_ПозицияНачала;
+	ВыражениеИдентификатор = РазобратьВыражениеИдентификатор(Истина, НоваяПеременная, Вызов);
+	Если Вызов Тогда
+		Ошибка("Ожидается переменная", ПеремПозиция, Истина);
+	КонецЕсли;
+	Ожидается(Токены.Из);
+	СледующийТокен();
+	Коллекция = РазобратьВыражение();
+	Если НоваяПеременная <> Неопределено Тогда
+		Парсер_Переменные.Вставить(НоваяПеременная.Имя, НоваяПеременная);
+		Парсер_Окружение.Авто.Добавить(НоваяПеременная);
+	КонецЕсли;
+	Ожидается(Токены.Цикл);
+	СледующийТокен();
+	Инструкции = РазобратьИнструкции();
+	Ожидается(Токены.КонецЦикла);
+	СледующийТокен();
+	Возврат ИнструкцияДляКаждого(ВыражениеИдентификатор, Коллекция, Инструкции, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюДляКаждого()
+
+Функция РазобратьИнструкциюПерейти()
+	Перем Метка, Позиция, НомерСтроки;
+	СледующийТокен();
+	Ожидается(Токены.Метка);
+	Метка = Парсер_Литерал;
+	СледующийТокен();
+	Возврат ИнструкцияПерейти(Метка, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПерейти()
+
+Функция РазобратьИнструкциюВозврат()
+	Перем Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Если Парсер_ЭтоФункция Тогда
+		Выражение = РазобратьВыражение();
+	КонецЕсли;
+	Возврат ИнструкцияВозврат(Выражение, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюВозврат()
+
+Функция РазобратьИнструкциюПрервать()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Возврат ИнструкцияПрервать(Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПрервать()
+
+Функция РазобратьИнструкциюПродолжить()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Возврат ИнструкцияПродолжить(Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПродолжить()
+
+Функция РазобратьИнструкциюМетка()
+	Перем Позиция, НомерСтроки, Метка;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Метка = Парсер_Литерал;
+	СледующийТокен();
+	Ожидается(Токены.Двоеточие);
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияМетка(Метка, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюМетка()
+
+#КонецОбласти // РазборИнструкций
+
+#Область РазборПрепроцессора
+
+// Выражения
+
+Функция РазобратьВыражениеПрепроцессора()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеПрепроцессораИ();
+	Пока Парсер_Токен = Токены.Или Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеПрепроцессораБинарное(Выражение, Оператор, РазобратьВыражениеПрепроцессораИ(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеПрепроцессора()
+
+Функция РазобратьВыражениеПрепроцессораИ()
+	Перем Выражение, Оператор, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Выражение = РазобратьВыражениеПрепроцессораНе();
+	Пока Парсер_Токен = Токены.И Цикл
+		Оператор = Парсер_Токен;
+		СледующийТокен();
+		Выражение = ВыражениеПрепроцессораБинарное(Выражение, Оператор, РазобратьВыражениеПрепроцессораНе(), Место(Позиция, НомерСтроки));
+	КонецЦикла;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеПрепроцессораИ()
+
+Функция РазобратьВыражениеПрепроцессораНе()
+	Перем Выражение, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Если Парсер_Токен = Токены.Не Тогда
+		СледующийТокен();
+		Выражение = ВыражениеПрепроцессораНе(РазобратьВыражениеПрепроцессораСимвол(), Место(Позиция, НомерСтроки));
+	Иначе
+		Выражение = РазобратьВыражениеПрепроцессораСимвол();
+	КонецЕсли;
+	Возврат Выражение;
+КонецФункции // РазобратьВыражениеПрепроцессораНе()
+
+Функция РазобратьВыражениеПрепроцессораСимвол()
+	Перем Операнд, СимволСуществует;
+	Если Парсер_Токен = Токены.Идентификатор Тогда
+		СимволСуществует = СимволыПрепроцессора.Свойство(Парсер_Литерал);
+		Операнд = ВыражениеПрепроцессораСимвол(Парсер_Литерал, СимволСуществует, Место());
+		СледующийТокен();
+	Иначе
+		Ошибка("Ожидается символ препроцессора", , Истина);
+	КонецЕсли;
+	Возврат Операнд;
+КонецФункции // РазобратьВыражениеПрепроцессораСимвол()
+
+// Инструкции
+
+Функция РазобратьИнструкциюПрепроцессораИспользовать()
+	Перем Путь, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Если НомерСтроки <> Парсер_ТекущийНомерСтроки Тогда
+		Ошибка("Ожидается строка или идентификатор", Парсер_ПозицияОкончания, Истина);
+	КонецЕсли;
+	Если Парсер_Токен = Токены.Число Тогда
+		Путь = Парсер_Литерал;
+		Если КартаБуквЦифр[Парсер_Символ] = Буква Тогда  // может быть ключевым словом
+			СледующийТокен();
+			Путь = Путь + Парсер_Литерал;
+		КонецЕсли;
+	ИначеЕсли Парсер_Токен = Токены.Идентификатор
+		Или Парсер_Токен = Токены.Строка Тогда
+		Путь = Парсер_Литерал;
+	Иначе
+		Ошибка("Ожидается строка или идентификатор", Парсер_ПозицияОкончания, Истина);
+	КонецЕсли;
+	СледующийТокен();
+	Возврат ИнструкцияПрепроцессораИспользовать(Путь, Место(Позиция, НомерСтроки));
+КонецФункции // РазобратьИнструкциюПрепроцессораИспользовать()
+
+Функция РазобратьИнструкциюПрепроцессораЕсли()
+	Перем Условие, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Условие = РазобратьВыражениеПрепроцессора();
+	Ожидается(Токены.Тогда);
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораЕсли(Условие, Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораЕсли()
+
+Функция РазобратьИнструкциюПрепроцессораИначеЕсли()
+	Перем Условие, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Условие = РазобратьВыражениеПрепроцессора();
+	Ожидается(Токены.Тогда);
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораИначеЕсли(Условие, Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораИначеЕсли()
+
+Функция РазобратьИнструкциюПрепроцессораИначе()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораИначе(Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораИначе()
+
+Функция РазобратьИнструкциюПрепроцессораКонецЕсли()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораКонецЕсли(Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораКонецЕсли()
+
+Функция РазобратьИнструкциюПрепроцессораОбласть()
+	Перем Имя, Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	СледующийТокен();
+	Ожидается(Токены.Идентификатор);
+	Имя = Парсер_Литерал;
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораОбласть(Имя, Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораОбласть()
+
+Функция РазобратьИнструкциюПрепроцессораКонецОбласти()
+	Перем Позиция, НомерСтроки;
+	Позиция = Парсер_ПозицияНачала;
+	НомерСтроки = Парсер_ТекущийНомерСтроки;
+	Парсер_Токен = Токены.ТочкаСЗапятой; // лазейка
+	Возврат ИнструкцияПрепроцессораКонецОбласти(Место(Позиция, НомерСтроки, Парсер_ТекущаяПозиция - Позиция));
+КонецФункции // РазобратьИнструкциюПрепроцессораКонецОбласти()
+
+#КонецОбласти // РазборПрепроцессора
+
+#КонецОбласти // Парсер
+
+#Область Вспомогательное
+
+Функция Место(Позиция = Неопределено, НомерСтроки = Неопределено, Длина = Неопределено)
+	Перем Место;
+	Если ПоложениеУзлаВАСТ Тогда
+		Если Позиция = Неопределено Тогда
+			Длина = СтрДлина(Парсер_Литерал);
+			Позиция = Парсер_ТекущаяПозиция - Длина;
+		ИначеЕсли Длина = Неопределено Тогда
+			Длина = Парсер_ПозицияОкончания - Позиция;
+		КонецЕсли;
+		Если НомерСтроки = Неопределено Тогда
+			НомерСтроки = Парсер_ТекущийНомерСтроки;
+		КонецЕсли;
+		Место = Новый Структура(
+		"Позиция," // число
+		"Длина," // число
+		"НомерСтрокиНачала," // число
+		"НомерСтрокиОкончания",  // число
+		Позиция, Длина, НомерСтроки, Парсер_НомерСтрокиОкончания);
+		Если Отладка Тогда
+			Место.Вставить("Строка", Сред(Парсер_Исходник, Позиция, Длина));
+		КонецЕсли;
+	Иначе
+		Место = НомерСтроки;
+	КонецЕсли;
+	Возврат Место;
+КонецФункции // Место()
+
+Функция КакДата(ЛитералДаты)
+	Перем Список, Символ, Номер, ДатаСтрокой;
+	Список = Новый Массив;
+	Для Номер = 1 По СтрДлина(ЛитералДаты) Цикл
+		Символ = Сред(ЛитералДаты, Номер, 1);
+		Если КартаБуквЦифр[Символ] = Цифра Тогда
+			Список.Добавить(Символ);
+		КонецЕсли;
+	КонецЦикла;
+	ДатаСтрокой = СтрСоединить(Список);
+	Если ДатаСтрокой = "00000000"
+		Или ДатаСтрокой = "000000000000"
+		Или ДатаСтрокой = "00000000000000" Тогда
+		Возврат '00010101';
+	КонецЕсли;
+	Возврат Дата(ДатаСтрокой);
+КонецФункции // КакДата()
+
+Процедура Ожидается(Токен)
+	Если Парсер_Токен <> Токен Тогда
+		Ошибка("Ожидается " + Токен, , Истина);
+	КонецЕсли;
+КонецПроцедуры // Ожидается()
+
+Функция ТокенСтроки(Литерал)
+	Перем Токен;
+	Если Лев(Литерал, 1) = """" Тогда
+		Если Прав(Литерал, 1) = """" Тогда
+			Токен = Токены.Строка;
+		Иначе
+			Токен = Токены.СтрокаНачало;
+		КонецЕсли;
+	Иначе  // |
+		Если Прав(Литерал, 1) = """" Тогда
+			Токен = Токены.СтрокаОкончание;
+		Иначе
+			Токен = Токены.СтрокаПродолжение;
+		КонецЕсли;
+	КонецЕсли;
+	Возврат Токен;
+КонецФункции // ТокенСтроки()
+
+Процедура Ошибка(Текст, Позиция = Неопределено, Остановить = Ложь)
+	Перем ТекстОшибки;
+	Если Позиция = Неопределено Тогда
+		Позиция = Min(Парсер_ТекущаяПозиция - СтрДлина(Парсер_Литерал), Парсер_Длина);
+	КонецЕсли;
+	ТекстОшибки = СтрШаблон("[ Стр: %1; Кол: %2 ] %3",
+		СтрЧислоВхождений(Сред(Парсер_Исходник, 1, Позиция), ПереводСтроки) + 1,
+		Позиция - ?(Позиция = 0, 0, СтрНайти(Парсер_Исходник, ПереводСтроки, НаправлениеПоиска.СКонца, Позиция)),
+		Текст
 	);
-	If Stop Then
-		Raise ErrorText;
-	Else
-		Message(ErrorText);
-	EndIf;
-EndProcedure // Error()
+	Если Остановить Тогда
+		ВызватьИсключение ТекстОшибки;
+	Иначе
+		Сообщить(ТекстОшибки);
+	КонецЕсли;
+КонецПроцедуры // Ошибка()
 
-#EndRegion // Auxiliary
+#КонецОбласти // Вспомогательное
 
-#Region Visitor
+#Область Посетитель
 
-Procedure HookUp(Val Plugins) Export
-	Var Plugin, List, MethodName;
-	If TypeOf(Plugins) <> Type("Array") Then
-		Plugin = Plugins;
-		Plugins = New Array;
-		Plugins.Add(Plugin);
-	EndIf;
-	Visitor_Plugins = Plugins;
-	Visitor_Hooks = Hooks();
-	For Each Plugin In Plugins Do
-		List = Undefined;
-		For Each MethodName In Plugin.Interface() Do
-			If Visitor_Hooks.Property(MethodName, List) Then
-				List.Add(Plugin);
-			EndIf;
-		EndDo;
-	EndDo;
-EndProcedure // HookUp()
+Процедура Подключить(Знач Плагины) Экспорт
+	Перем Плагин, Список, ИмяМетода;
+	Если ТипЗнч(Плагины) <> Тип("Массив") Тогда
+		Плагин = Плагины;
+		Плагины = Новый Массив;
+		Плагины.Добавить(Плагин);
+	КонецЕсли;
+	Посетитель_Плагины = Плагины;
+	Посетитель_Подписки = Подписки();
+	Для Каждого Плагин Из Плагины Цикл
+		Список = Неопределено;
+		Для Каждого ИмяМетода Из Плагин.Интерфейс() Цикл
+			Если Посетитель_Подписки.Свойство(ИмяМетода, Список) Тогда
+				Список.Добавить(Плагин);
+			КонецЕсли;
+		КонецЦикла;
+	КонецЦикла;
+КонецПроцедуры // Подключить()
 
-Procedure PushInfo(Parent)
-	Var NodeType;
-	Visitor_Stack = New FixedStructure("Outer, Parent", Visitor_Stack, Parent);
-	NodeType = Parent.Type;
-	Visitor_Counters[NodeType] = Visitor_Counters[NodeType] + 1;
-EndProcedure // PushInfo()
+Процедура ЗакинутьИнформациюНаСтек(Родитель)
+	Перем ТипУзла;
+	Посетитель_Стек = Новый ФиксированнаяСтруктура("Внешний, Родитель", Посетитель_Стек, Родитель);
+	ТипУзла = Родитель.Тип;
+	Посетитель_Счетчики[ТипУзла] = Посетитель_Счетчики[ТипУзла] + 1;
+КонецПроцедуры // ЗакинутьИнформациюНаСтек()
 
-Procedure PopInfo()
-	Var NodeType;
-	NodeType = Visitor_Stack.Parent.Type;
-	Visitor_Counters[NodeType] = Visitor_Counters[NodeType] - 1;
-	Visitor_Stack = Visitor_Stack.Outer;
-EndProcedure // PopInfo()
+Процедура СнятьИнформациюСоСтека()
+	Перем ТипУзла;
+	ТипУзла = Посетитель_Стек.Родитель.Тип;
+	Посетитель_Счетчики[ТипУзла] = Посетитель_Счетчики[ТипУзла] - 1;
+	Посетитель_Стек = Посетитель_Стек.Внешний;
+КонецПроцедуры // СнятьИнформациюСоСтека()
 
-Function Hooks()
-	Var Hooks, Item;
+Функция Подписки()
+	Перем Подписки, Элемент;
 
-	Hooks = New Structure(
-		"VisitModule,         AfterVisitModule,"
-		"VisitDeclarations,   AfterVisitDeclarations,"
-		"VisitStatements,     AfterVisitStatements,"
-		"VisitDecl,           AfterVisitDecl,"
-		"VisitVarModListDecl, AfterVisitVarModListDecl,"
-		"VisitVarModDecl,     AfterVisitVarModDecl,"
-		"VisitVarLocDecl,     AfterVisitVarLocDecl,"
-		"VisitParamDecl,      AfterVisitParamDecl,"
-		"VisitMethodDecl,     AfterVisitMethodDecl,"
-		"VisitSignature,      AfterVisitSignature,"
-		"VisitExpr,           AfterVisitExpr,"
-		"VisitBasicLitExpr,   AfterVisitBasicLitExpr,"
-		"VisitIdentExpr,      AfterVisitIdentExpr,"
-		"VisitUnaryExpr,      AfterVisitUnaryExpr,"
-		"VisitBinaryExpr,     AfterVisitBinaryExpr,"
-		"VisitNewExpr,        AfterVisitNewExpr,"
-		"VisitTernaryExpr,    AfterVisitTernaryExpr,"
-		"VisitParenExpr,      AfterVisitParenExpr,"
-		"VisitNotExpr,        AfterVisitNotExpr,"
-		"VisitStringExpr,     AfterVisitStringExpr,"
-		"VisitStmt,           AfterVisitStmt,"
-		"VisitAssignStmt,     AfterVisitAssignStmt,"
-		"VisitReturnStmt,     AfterVisitReturnStmt,"
-		"VisitBreakStmt,      AfterVisitBreakStmt,"
-		"VisitContinueStmt,   AfterVisitContinueStmt,"
-		"VisitRaiseStmt,      AfterVisitRaiseStmt,"
-		"VisitExecuteStmt,    AfterVisitExecuteStmt,"
-		"VisitCallStmt,       AfterVisitCallStmt,"
-		"VisitIfStmt,         AfterVisitIfStmt,"
-		"VisitElsIfStmt,      AfterVisitElsIfStmt,"
-		"VisitElseStmt,       AfterVisitElseStmt,"
-		"VisitWhileStmt,      AfterVisitWhileStmt,"
-		"VisitForStmt,        AfterVisitForStmt,"
-		"VisitForEachStmt,    AfterVisitForEachStmt,"
-		"VisitTryStmt,        AfterVisitTryStmt,"
-		"VisitExceptStmt,     AfterVisitExceptStmt,"
-		"VisitGotoStmt,       AfterVisitGotoStmt,"
-		"VisitLabelStmt,      AfterVisitLabelStmt,"
-		"VisitPrepInst,       AfterVisitPrepInst,"
-		"VisitPrepExpr,       AfterVisitPrepExpr,"
-		"VisitPrepBinaryExpr, AfterVisitPrepBinaryExpr,"
-		"VisitPrepNotExpr,    AfterVisitPrepNotExpr,"
-		"VisitPrepSymExpr,    AfterVisitPrepSymExpr"
+	Подписки = Новый Структура(
+		"ПосетитьМодуль,                                 ПослеПосещенияМодуль,"
+		"ПосетитьОбъявления,                             ПослеПосещенияОбъявления,"
+		"ПосетитьИнструкции,                             ПослеПосещенияИнструкции,"
+		"ПосетитьОбъявление,                             ПослеПосещенияОбъявления,"
+		"ПосетитьОбъявлениеСпискаПеременныхУровняМодуля, ПослеПосещенияОбъявленияСпискаПеременныхУровняМодуля,"
+		"ПосетитьОбъявлениеПеременнойУровняМодуля,       ПослеПосещенияОбъявленияПеременнойУровняМодуля,"
+		"ПосетитьОбъявлениеЛокальнойПеременной,          ПослеПосещенияОбъявленияЛокальнойПеременной,"
+		"ПосетитьОбъявлениеПараметра,                    ПослеПосещенияОбъявленияПараметра,"
+		"ПосетитьОбъявлениеМетода,                       ПослеПосещенияОбъявленияМетода,"
+		"ПосетитьСигнатуру,                              ПослеПосещенияСигнатуры,"
+		"ПосетитьВыражение,                              ПослеПосещенияВыражения,"
+		"ПосетитьВыражениеОсновнойЛитерал,               ПослеПосещенияВыраженияОсновнойЛитерал,"
+		"ПосетитьВыражениеИдентификатор,                 ПослеПосещенияВыраженияИдентификатор,"
+		"ПосетитьВыражениеУнарное,                       ПослеПосещенияВыраженияУнарное,"
+		"ПосетитьВыражениеБинарное,                      ПослеПосещенияВыраженияБинарное,"
+		"ПосетитьВыражениеНовый,                         ПослеПосещенияВыраженияНовый,"
+		"ПосетитьВыражениеТернарное,                     ПослеПосещенияВыраженияТернарное,"
+		"ПосетитьВыражениеСкобки,                        ПослеПосещенияВыраженияСкобки,"
+		"ПосетитьВыражениеНе,                            ПослеПосещенияВыраженияНе,"
+		"ПосетитьВыражениеСтрока,                        ПослеПосещенияВыраженияСтрока,"
+		"ПосетитьИнструкцию,                             ПослеПосещенияИнструкции,"
+		"ПосетитьИнструкциюПрисваивания,                 ПослеПосещенияИнструкцииПрисваивания,"
+		"ПосетитьИнструкциюВозврат,                      ПослеПосещенияИнструкцииВозврат,"
+		"ПосетитьИнструкциюПрервать,                     ПослеПосещенияИнструкцииПрервать,"
+		"ПосетитьИнструкциюПродолжить,                   ПослеПосещенияИнструкцииПродолжить,"
+		"ПосетитьИнструкциюВызватьИсключение,            ПослеПосещенияИнструкцииВызватьИсключение,"
+		"ПосетитьИнструкциюВыполнить,                    ПослеПосещенияИнструкцииВыполнить,"
+		"ПосетитьИнструкциюВызвать,                      ПослеПосещенияИнструкцииВызвать,"
+		"ПосетитьИнструкциюЕсли,                         ПослеПосещенияИнструкцииЕсли,"
+		"ПосетитьИнструкциюИначеЕсли,                    ПослеПосещенияИнструкцииИначеЕсли,"
+		"ПосетитьИнструкциюИначе,                        ПослеПосещенияИнструкцииИначе,"
+		"ПосетитьИнструкциюПока,                         ПослеПосещенияИнструкцииПока,"
+		"ПосетитьИнструкциюДля,                          ПослеПосещенияИнструкцииДля,"
+		"ПосетитьИнструкциюДляКаждого,                   ПослеПосещенияИнструкцииДляКаждого,"
+		"ПосетитьИнструкциюПопытка,                      ПослеПосещенияИнструкцииПопытка,"
+		"ПосетитьИнструкциюИсключение,                   ПослеПосещенияИнструкцииИсключение,"
+		"ПосетитьИнструкциюПерейти,                      ПослеПосещенияИнструкцииПерейти,"
+		"ПосетитьИнструкциюМетка,                        ПослеПосещенияИнструкцииМетка,"
+		"ПосетитьИнструкциюПрепроцессора,                ПослеПосещенияИнструкцииПрепроцессора,"
+		"ПосетитьВыражениеПрепроцессора,                 ПослеПосещенияВыраженияПрепроцессора,"
+		"ПосетитьВыражениеПрепроцессораБинарное,         ПослеПосещенияВыраженияПрепроцессораБинарное,"
+		"ПосетитьВыражениеПрепроцессораНе,               ПослеПосещенияВыраженияПрепроцессораНе,"
+		"ПосетитьВыражениеПрепроцессораСимвол,           ПослеПосещенияВыраженияПрепроцессораСимвол"
 	);
-	For Each Item In Hooks Do
-		Hooks[Item.Key] = New Array;
-	EndDo;
+	Для Каждого Элемент Из Подписки Цикл
+		Подписки[Элемент.Key] = Новый Массив;
+	КонецЦикла;
 
-	Return Hooks;
+	Возврат Подписки;
 
-EndFunction // Hooks()
+КонецФункции // Подписки()
 
-Procedure VisitModule(Module) Export
-	Var Plugin, Hook, Item;
-	For Each Plugin In Visitor_Plugins Do
-		Plugin.Init(ThisObject);
-	EndDo;
-	Visitor_Stack = New FixedStructure("Outer, Parent", Undefined, Undefined);
-	Visitor_Counters = New Structure;
-	For Each Item In Nodes Do
-		Visitor_Counters.Insert(Item.Key, 0);
-	EndDo;
-	For Each Hook In Visitor_Hooks.VisitModule Do
-		Hook.VisitModule(Module, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(Module);
-	VisitDeclarations(Module.Decls);
-	VisitStatements(Module.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitModule Do
-		Hook.AfterVisitModule(Module, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitModule()
+Процедура ПосетитьМодуль(Модуль) Экспорт
+	Перем Плагин, Подписка, Элемент;
+	Для Каждого Плагин Из Посетитель_Плагины Цикл
+		Плагин.Инициализировать(ЭтотОбъект);
+	КонецЦикла;
+	Посетитель_Стек = Новый ФиксированнаяСтруктура("Внешний, Родитель", Неопределено, Неопределено);
+	Посетитель_Счетчики = Новый Структура;
+	Для Каждого Элемент Из Узлы Цикл
+		Посетитель_Счетчики.Вставить(Элемент.Key, 0);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьМодуль Цикл
+		Подписка.ПосетитьМодуль(Модуль, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(Модуль);
+	ПосетитьОбъявления(Модуль.Объявления);
+	ПосетитьИнструкции(Модуль.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияМодуль Цикл
+		Подписка.ПослеПосещенияМодуль(Модуль, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьМодуль()
 
-Procedure VisitDeclarations(Declarations)
-	Var Decl, Hook;
-	For Each Hook In Visitor_Hooks.VisitDeclarations Do
-		Hook.VisitDeclarations(Declarations, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Decl In Declarations Do
-		VisitDecl(Decl);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitDeclarations Do
-		Hook.AfterVisitDeclarations(Declarations, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitDeclarations()
+Процедура ПосетитьОбъявления(Объявления)
+	Перем Объявление, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявления Цикл
+		Подписка.ПосетитьОбъявления(Объявления, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Объявление Из Объявления Цикл
+		ПосетитьОбъявление(Объявление);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявления Цикл
+		Подписка.ПослеПосещенияОбъявления(Объявления, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявления()
 
-Procedure VisitStatements(Statements)
-	Var Stmt, Hook;
-	For Each Hook In Visitor_Hooks.VisitStatements Do
-		Hook.VisitStatements(Statements, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Stmt In Statements Do
-		VisitStmt(Stmt);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitStatements Do
-		Hook.AfterVisitStatements(Statements, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitStatements()
+Процедура ПосетитьИнструкции(Инструкции)
+	Перем Инструкция, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкции Цикл
+		Подписка.ПосетитьИнструкции(Инструкции, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Инструкция Из Инструкции Цикл
+		ПосетитьИнструкцию(Инструкция);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкции Цикл
+		Подписка.ПослеПосещенияИнструкции(Инструкции, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкции()
 
-#Region VisitDecl
+#Область ПосещениеОбъявлений
 
-Procedure VisitDecl(Decl)
-	Var Type, Hook;
-	For Each Hook In Visitor_Hooks.VisitDecl Do
-		Hook.VisitDecl(Decl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	Type = Decl.Type;
-	If Type = Nodes.VarModDecl Then
-		VisitVarModDecl(Decl);
-	ElsIf Type = Nodes.VarLocDecl Then
-		VisitVarLocDecl(Decl);
-	ElsIf Type = Nodes.MethodDecl Then
-		VisitMethodDecl(Decl);
-	ElsIf Type = Nodes.PrepRegionInst
-		Or Type = Nodes.PrepEndRegionInst
-		Or Type = Nodes.PrepIfInst
-		Or Type = Nodes.PrepElsIfInst
-		Or Type = Nodes.PrepElseInst
-		Or Type = Nodes.PrepEndIfInst
-		Or Type = Nodes.PrepUseInst Then
-		VisitPrepInst(Decl);
-	EndIf;
-	For Each Hook In Visitor_Hooks.AfterVisitDecl Do
-		Hook.AfterVisitDecl(Decl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitDecl()
+Процедура ПосетитьОбъявление(Объявление)
+	Перем Тип, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявление Цикл
+		Подписка.ПосетитьОбъявление(Объявление, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Тип = Объявление.Тип;
+	Если Тип = Узлы.ОбъявлениеПеременнойУровняМодуля Тогда
+		ПосетитьОбъявлениеПеременнойУровняМодуля(Объявление);
+	ИначеЕсли Тип = Узлы.ОбъявлениеЛокальнойПеременной Тогда
+		ПосетитьОбъявлениеЛокальнойПеременной(Объявление);
+	ИначеЕсли Тип = Узлы.ОбъявлениеМетода Тогда
+		ПосетитьОбъявлениеМетода(Объявление);
+	ИначеЕсли Тип = Узлы.ИнструкцияПрепроцессораОбласть
+		Или Тип = Узлы.ИнструкцияПрепроцессораКонецОбласти
+		Или Тип = Узлы.ИнструкцияПрепроцессораЕсли
+		Или Тип = Узлы.ИнструкцияПрепроцессораИначеЕсли
+		Или Тип = Узлы.ИнструкцияПрепроцессораИначе
+		Или Тип = Узлы.ИнструкцияПрепроцессораКонецЕсли
+		Или Тип = Узлы.ИнструкцияПрепроцессораИспользовать Тогда
+		ПосетитьИнструкциюПрепроцессора(Объявление);
+	КонецЕсли;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявления Цикл
+		Подписка.ПослеПосещенияОбъявления(Объявление, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявление()
 
-Procedure VisitVarModListDecl(VarModListDecl)
-	Var Hook, VarModDecl;
-	For Each Hook In Visitor_Hooks.VisitVarModListDecl Do
-		Hook.VisitVarModListDecl(VarModListDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(VarModListDecl);
-	For Each VarModDecl In VarModListDecl.List Do
-		VisitVarModDecl(VarModDecl);
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitVarModListDecl Do
-		Hook.AfterVisitVarModListDecl(VarModListDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitVarModListDecl()
+Процедура ПосетитьОбъявлениеСпискаПеременныхУровняМодуля(ОбъявлениеСпискаПеременныхУровняМодуля)
+	Перем Подписка, ОбъявлениеПеременнойУровняМодуля;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявлениеСпискаПеременныхУровняМодуля Цикл
+		Подписка.ПосетитьОбъявлениеСпискаПеременныхУровняМодуля(ОбъявлениеСпискаПеременныхУровняМодуля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ОбъявлениеСпискаПеременныхУровняМодуля);
+	Для Каждого ОбъявлениеПеременнойУровняМодуля Из ОбъявлениеСпискаПеременныхУровняМодуля.Список Цикл
+		ПосетитьОбъявлениеПеременнойУровняМодуля(ОбъявлениеПеременнойУровняМодуля);
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявленияСпискаПеременныхУровняМодуля Цикл
+		Подписка.ПослеПосещенияОбъявленияСпискаПеременныхУровняМодуля(ОбъявлениеСпискаПеременныхУровняМодуля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеСпискаПеременныхУровняМодуля()
 
-Procedure VisitVarModDecl(VarModDecl)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitVarModDecl Do
-		Hook.VisitVarModDecl(VarModDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitVarModDecl Do
-		Hook.AfterVisitVarModDecl(VarModDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitVarModDecl()
+Процедура ПосетитьОбъявлениеПеременнойУровняМодуля(ОбъявлениеПеременнойУровняМодуля)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявлениеПеременнойУровняМодуля Цикл
+		Подписка.ПосетитьОбъявлениеПеременнойУровняМодуля(ОбъявлениеПеременнойУровняМодуля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявленияПеременнойУровняМодуля Цикл
+		Подписка.ПослеПосещенияОбъявленияПеременнойУровняМодуля(ОбъявлениеПеременнойУровняМодуля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеПеременнойУровняМодуля()
 
-Procedure VisitVarLocDecl(VarLocDecl)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitVarLocDecl Do
-		Hook.VisitVarLocDecl(VarLocDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitVarLocDecl Do
-		Hook.AfterVisitVarLocDecl(VarLocDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitVarLocDecl()
+Процедура ПосетитьОбъявлениеЛокальнойПеременной(ОбъявлениеЛокальнойПеременной)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявлениеЛокальнойПеременной Цикл
+		Подписка.ПосетитьОбъявлениеЛокальнойПеременной(ОбъявлениеЛокальнойПеременной, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявленияЛокальнойПеременной Цикл
+		Подписка.ПослеПосещенияОбъявленияЛокальнойПеременной(ОбъявлениеЛокальнойПеременной, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеЛокальнойПеременной()
 
-Procedure VisitParamDecl(ParamDecl)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitParamDecl Do
-		Hook.VisitParamDecl(ParamDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitParamDecl Do
-		Hook.AfterVisitParamDecl(ParamDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitParamDecl()
+Процедура ПосетитьОбъявлениеПараметра(ОбъявлениеПараметра)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявлениеПараметра Цикл
+		Подписка.ПосетитьОбъявлениеПараметра(ОбъявлениеПараметра, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявленияПараметра Цикл
+		Подписка.ПослеПосещенияОбъявленияПараметра(ОбъявлениеПараметра, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеПараметра()
 
-Procedure VisitMethodDecl(MethodDecl)
-	Var Hook, VarLocDecl;
-	For Each Hook In Visitor_Hooks.VisitMethodDecl Do
-		Hook.VisitMethodDecl(MethodDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(MethodDecl);
-	VisitSignature(MethodDecl.Sign);
-	For Each VarLocDecl In MethodDecl.Vars Do
-		VisitVarLocDecl(VarLocDecl);
-	EndDo;
-	VisitStatements(MethodDecl.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitMethodDecl Do
-		Hook.AfterVisitMethodDecl(MethodDecl, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitMethodDecl()
+Процедура ПосетитьОбъявлениеМетода(ОбъявлениеМетода)
+	Перем Подписка, ОбъявлениеЛокальнойПеременной;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьОбъявлениеМетода Цикл
+		Подписка.ПосетитьОбъявлениеМетода(ОбъявлениеМетода, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ОбъявлениеМетода);
+	ПосетитьСигнатуру(ОбъявлениеМетода.Сигнатура);
+	Для Каждого ОбъявлениеЛокальнойПеременной Из ОбъявлениеМетода.Переменные Цикл
+		ПосетитьОбъявлениеЛокальнойПеременной(ОбъявлениеЛокальнойПеременной);
+	КонецЦикла;
+	ПосетитьИнструкции(ОбъявлениеМетода.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияОбъявленияМетода Цикл
+		Подписка.ПослеПосещенияОбъявленияМетода(ОбъявлениеМетода, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьОбъявлениеМетода()
 
-Procedure VisitSignature(Sign)
-	Var Hook, ParamDecl;
-	For Each Hook In Visitor_Hooks.VisitSignature Do
-		Hook.VisitSignature(Sign, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(Sign);
-	For Each ParamDecl In Sign.Params Do
-		VisitParamDecl(ParamDecl);
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitSignature Do
-		Hook.AfterVisitSignature(Sign, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitSignature()
+Процедура ПосетитьСигнатуру(Сигнатура)
+	Перем Подписка, ОбъявлениеПараметра;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьСигнатуру Цикл
+		Подписка.ПосетитьСигнатуру(Сигнатура, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(Сигнатура);
+	Для Каждого ОбъявлениеПараметра Из Сигнатура.Параметры Цикл
+		ПосетитьОбъявлениеПараметра(ОбъявлениеПараметра);
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияСигнатуры Цикл
+		Подписка.ПослеПосещенияСигнатуры(Сигнатура, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьСигнатуру()
 
-#EndRegion // VisitDecl
+#КонецОбласти // ПосещениеОбъявлений
 
-#Region VisitExpr
+#Область ПосещениеВыражений
 
-Procedure VisitExpr(Expr)
-	Var Type, Hook;
-	For Each Hook In Visitor_Hooks.VisitExpr Do
-		Hook.VisitExpr(Expr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	Type = Expr.Type;
-	If Type = Nodes.BasicLitExpr Then
-		VisitBasicLitExpr(Expr);
-	ElsIf Type = Nodes.IdentExpr Then
-		VisitIdentExpr(Expr);
-	ElsIf Type = Nodes.UnaryExpr Then
-		VisitUnaryExpr(Expr);
-	ElsIf Type = Nodes.BinaryExpr Then
-		VisitBinaryExpr(Expr);
-	ElsIf Type = Nodes.NewExpr Then
-		VisitNewExpr(Expr);
-	ElsIf Type = Nodes.TernaryExpr Then
-		VisitTernaryExpr(Expr);
-	ElsIf Type = Nodes.ParenExpr Then
-		VisitParenExpr(Expr);
-	ElsIf Type = Nodes.NotExpr Then
-		VisitNotExpr(Expr);
-	ElsIf Type = Nodes.StringExpr Then
-		VisitStringExpr(Expr);
-	EndIf;
-	For Each Hook In Visitor_Hooks.AfterVisitExpr Do
-		Hook.AfterVisitExpr(Expr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitExpr()
+Процедура ПосетитьВыражение(Выражение)
+	Перем Тип, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражение Цикл
+		Подписка.ПосетитьВыражение(Выражение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Тип = Выражение.Тип;
+	Если Тип = Узлы.ВыражениеОсновнойЛитерал Тогда
+		ПосетитьВыражениеОсновнойЛитерал(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеИдентификатор Тогда
+		ПосетитьВыражениеИдентификатор(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеУнарное Тогда
+		ПосетитьВыражениеУнарное(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеБинарное Тогда
+		ПосетитьВыражениеБинарное(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеНовый Тогда
+		ПосетитьВыражениеНовый(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеТернарное Тогда
+		ПосетитьВыражениеТернарное(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеСкобки Тогда
+		ПосетитьВыражениеСкобки(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеНе Тогда
+		ПосетитьВыражениеНе(Выражение);
+	ИначеЕсли Тип = Узлы.ВыражениеСтрока Тогда
+		ПосетитьВыражениеСтрока(Выражение);
+	КонецЕсли;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыражения Цикл
+		Подписка.ПослеПосещенияВыражения(Выражение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражение()
 
-Procedure VisitBasicLitExpr(BasicLitExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitBasicLitExpr Do
-		Hook.VisitBasicLitExpr(BasicLitExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitBasicLitExpr Do
-		Hook.AfterVisitBasicLitExpr(BasicLitExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitBasicLitExpr()
+Процедура ПосетитьВыражениеОсновнойЛитерал(ВыражениеОсновнойЛитерал)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеОсновнойЛитерал Цикл
+		Подписка.ПосетитьВыражениеОсновнойЛитерал(ВыражениеОсновнойЛитерал, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияОсновнойЛитерал Цикл
+		Подписка.ПослеПосещенияВыраженияОсновнойЛитерал(ВыражениеОсновнойЛитерал, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеОсновнойЛитерал()
 
-Procedure VisitIdentExpr(IdentExpr)
-	Var Item, Expr, Hook;
-	For Each Hook In Visitor_Hooks.VisitIdentExpr Do
-		Hook.VisitIdentExpr(IdentExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(IdentExpr);
-	If IdentExpr.Args <> Undefined Then
-		For Each Expr In IdentExpr.Args Do
-			If Expr <> Undefined Then
-				VisitExpr(Expr);
-			EndIf;
-		EndDo;
-	EndIf;
-	For Each Item In IdentExpr.Tail Do
-		If Item.Type = Nodes.FieldExpr Then
-			If Item.Args <> Undefined Then
-				For Each Expr In Item.Args Do
-					If Expr <> Undefined Then
-						VisitExpr(Expr);
-					EndIf;
-				EndDo;
-			EndIf;
-		ElsIf Item.Type = Nodes.IndexExpr Then
-			VisitExpr(Item.Expr);
-		Else
-			Raise "Call in violation of protocol";
-		EndIf;
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitIdentExpr Do
-		Hook.AfterVisitIdentExpr(IdentExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitIdentExpr()
+Процедура ПосетитьВыражениеИдентификатор(ВыражениеИдентификатор)
+	Перем Элемент, Выражение, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеИдентификатор Цикл
+		Подписка.ПосетитьВыражениеИдентификатор(ВыражениеИдентификатор, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеИдентификатор);
+	Если ВыражениеИдентификатор.Аргументы <> Неопределено Тогда
+		Для Каждого Выражение Из ВыражениеИдентификатор.Аргументы Цикл
+			Если Выражение <> Неопределено Тогда
+				ПосетитьВыражение(Выражение);
+			КонецЕсли;
+		КонецЦикла;
+	КонецЕсли;
+	Для Каждого Элемент Из ВыражениеИдентификатор.Хвост Цикл
+		Если Элемент.Тип = Узлы.ВыражениеПоле Тогда
+			Если Элемент.Аргументы <> Неопределено Тогда
+				Для Каждого Выражение Из Элемент.Аргументы Цикл
+					Если Выражение <> Неопределено Тогда
+						ПосетитьВыражение(Выражение);
+					КонецЕсли;
+				КонецЦикла;
+			КонецЕсли;
+		ИначеЕсли Элемент.Тип = Узлы.ВыражениеИндекс Тогда
+			ПосетитьВыражение(Элемент.Выражение);
+		Иначе
+			ВызватьИсключение "Вызов с нарушением протокола";
+		КонецЕсли;
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияИдентификатор Цикл
+		Подписка.ПослеПосещенияВыраженияИдентификатор(ВыражениеИдентификатор, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеИдентификатор()
 
-Procedure VisitUnaryExpr(UnaryExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitUnaryExpr Do
-		Hook.VisitUnaryExpr(UnaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(UnaryExpr);
-	VisitExpr(UnaryExpr.Operand);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitUnaryExpr Do
-		Hook.AfterVisitUnaryExpr(UnaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitUnaryExpr()
+Процедура ПосетитьВыражениеУнарное(ВыражениеУнарное)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеУнарное Цикл
+		Подписка.ПосетитьВыражениеУнарное(ВыражениеУнарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеУнарное);
+	ПосетитьВыражение(ВыражениеУнарное.Операнд);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияУнарное Цикл
+		Подписка.ПослеПосещенияВыраженияУнарное(ВыражениеУнарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеУнарное()
 
-Procedure VisitBinaryExpr(BinaryExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitBinaryExpr Do
-		Hook.VisitBinaryExpr(BinaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(BinaryExpr);
-	VisitExpr(BinaryExpr.Left);
-	VisitExpr(BinaryExpr.Right);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitBinaryExpr Do
-		Hook.AfterVisitBinaryExpr(BinaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitBinaryExpr()
+Процедура ПосетитьВыражениеБинарное(ВыражениеБинарное)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеБинарное Цикл
+		Подписка.ПосетитьВыражениеБинарное(ВыражениеБинарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеБинарное);
+	ПосетитьВыражение(ВыражениеБинарное.Левый);
+	ПосетитьВыражение(ВыражениеБинарное.Правый);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияБинарное Цикл
+		Подписка.ПослеПосещенияВыраженияБинарное(ВыражениеБинарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеБинарное()
 
-Procedure VisitNewExpr(NewExpr)
-	Var Expr, Hook;
-	For Each Hook In Visitor_Hooks.VisitNewExpr Do
-		Hook.VisitNewExpr(NewExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(NewExpr);
-	For Each Expr In NewExpr.Args Do
-		If Expr <> Undefined Then
-			VisitExpr(Expr);
-		EndIf;
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitNewExpr Do
-		Hook.AfterVisitNewExpr(NewExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitNewExpr()
+Процедура ПосетитьВыражениеНовый(ВыражениеНовый)
+	Перем Выражение, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеНовый Цикл
+		Подписка.ПосетитьВыражениеНовый(ВыражениеНовый, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеНовый);
+	Для Каждого Выражение Из ВыражениеНовый.Аргументы Цикл
+		Если Выражение <> Неопределено Тогда
+			ПосетитьВыражение(Выражение);
+		КонецЕсли;
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияНовый Цикл
+		Подписка.ПослеПосещенияВыраженияНовый(ВыражениеНовый, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеНовый()
 
-Procedure VisitTernaryExpr(TernaryExpr)
-	Var Item, Expr, Hook;
-	For Each Hook In Visitor_Hooks.VisitTernaryExpr Do
-		Hook.VisitTernaryExpr(TernaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(TernaryExpr);
-	VisitExpr(TernaryExpr.Cond);
-	VisitExpr(TernaryExpr.Then);
-	VisitExpr(TernaryExpr.Else);
-	For Each Item In TernaryExpr.Tail Do
-		If Item.Type = Nodes.FieldExpr Then
-			If Item.Args <> Undefined Then
-				For Each Expr In Item.Args Do
-					If Expr <> Undefined Then
-						VisitExpr(Expr);
-					EndIf;
-				EndDo;
-			EndIf;
-		ElsIf Item.Type = Nodes.IndexExpr Then
-			VisitExpr(Item.Expr);
-		Else
-			Raise "Call in violation of protocol";
-		EndIf;
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitTernaryExpr Do
-		Hook.AfterVisitTernaryExpr(TernaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitTernaryExpr()
+Процедура ПосетитьВыражениеТернарное(ВыражениеТернарное)
+	Перем Элемент, Выражение, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеТернарное Цикл
+		Подписка.ПосетитьВыражениеТернарное(ВыражениеТернарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеТернарное);
+	ПосетитьВыражение(ВыражениеТернарное.Условие);
+	ПосетитьВыражение(ВыражениеТернарное.Тогда);
+	ПосетитьВыражение(ВыражениеТернарное.Иначе);
+	Для Каждого Элемент Из ВыражениеТернарное.Хвост Цикл
+		Если Элемент.Тип = Узлы.ВыражениеПоле Тогда
+			Если Элемент.Аргументы <> Неопределено Тогда
+				Для Каждого Выражение Из Элемент.Аргументы Цикл
+					Если Выражение <> Неопределено Тогда
+						ПосетитьВыражение(Выражение);
+					КонецЕсли;
+				КонецЦикла;
+			КонецЕсли;
+		ИначеЕсли Элемент.Тип = Узлы.ВыражениеИндекс Тогда
+			ПосетитьВыражение(Элемент.Выражение);
+		Иначе
+			ВызватьИсключение "Вызов с нарушением протокола";
+		КонецЕсли;
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияТернарное Цикл
+		Подписка.ПослеПосещенияВыраженияТернарное(ВыражениеТернарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеТернарное()
 
-Procedure VisitParenExpr(ParenExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitParenExpr Do
-		Hook.VisitParenExpr(ParenExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ParenExpr);
-	VisitExpr(ParenExpr.Expr);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitParenExpr Do
-		Hook.AfterVisitParenExpr(ParenExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitParenExpr()
+Процедура ПосетитьВыражениеСкобки(ВыражениеСкобки)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеСкобки Цикл
+		Подписка.ПосетитьВыражениеСкобки(ВыражениеСкобки, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеСкобки);
+	ПосетитьВыражение(ВыражениеСкобки.Выражение);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияСкобки Цикл
+		Подписка.ПослеПосещенияВыраженияСкобки(ВыражениеСкобки, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеСкобки()
 
-Procedure VisitNotExpr(NotExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitNotExpr Do
-		Hook.VisitNotExpr(NotExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(NotExpr);
-	VisitExpr(NotExpr.Expr);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitNotExpr Do
-		Hook.AfterVisitNotExpr(NotExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitNotExpr()
+Процедура ПосетитьВыражениеНе(ВыражениеНе)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеНе Цикл
+		Подписка.ПосетитьВыражениеНе(ВыражениеНе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеНе);
+	ПосетитьВыражение(ВыражениеНе.Выражение);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияНе Цикл
+		Подписка.ПослеПосещенияВыраженияНе(ВыражениеНе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеНе()
 
-Procedure VisitStringExpr(StringExpr)
-	Var Expr, Hook;
-	For Each Hook In Visitor_Hooks.VisitStringExpr Do
-		Hook.VisitStringExpr(StringExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(StringExpr);
-	For Each Expr In StringExpr.List Do
-		VisitBasicLitExpr(Expr);
-	EndDo;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitStringExpr Do
-		Hook.AfterVisitStringExpr(StringExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitStringExpr()
+Процедура ПосетитьВыражениеСтрока(ВыражениеСтрока)
+	Перем Выражение, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеСтрока Цикл
+		Подписка.ПосетитьВыражениеСтрока(ВыражениеСтрока, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеСтрока);
+	Для Каждого Выражение Из ВыражениеСтрока.Список Цикл
+		ПосетитьВыражениеОсновнойЛитерал(Выражение);
+	КонецЦикла;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияСтрока Цикл
+		Подписка.ПослеПосещенияВыраженияСтрока(ВыражениеСтрока, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеСтрока()
 
-#EndRegion // VisitExpr
+#КонецОбласти // ПосещениеВыражений
 
-#Region VisitStmt
+#Область ПосещениеИнструкций
 
-Procedure VisitStmt(Stmt)
-	Var Type, Hook;
-	For Each Hook In Visitor_Hooks.VisitStmt Do
-		Hook.VisitStmt(Stmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	Type = Stmt.Type;
-	If Type = Nodes.AssignStmt Then
-		VisitAssignStmt(Stmt);
-	ElsIf Type = Nodes.ReturnStmt Then
-		VisitReturnStmt(Stmt);
-	ElsIf Type = Nodes.BreakStmt Then
-		VisitBreakStmt(Stmt);
-	ElsIf Type = Nodes.ContinueStmt Then
-		VisitContinueStmt(Stmt);
-	ElsIf Type = Nodes.RaiseStmt Then
-		VisitRaiseStmt(Stmt);
-	ElsIf Type = Nodes.ExecuteStmt Then
-		VisitExecuteStmt(Stmt);
-	ElsIf Type = Nodes.CallStmt Then
-		VisitCallStmt(Stmt);
-	ElsIf Type = Nodes.IfStmt Then
-		VisitIfStmt(Stmt);
-	ElsIf Type = Nodes.WhileStmt Then
-		VisitWhileStmt(Stmt);
-	ElsIf Type = Nodes.ForStmt Then
-		VisitForStmt(Stmt);
-	ElsIf Type = Nodes.ForEachStmt Then
-		VisitForEachStmt(Stmt);
-	ElsIf Type = Nodes.TryStmt Then
-		VisitTryStmt(Stmt);
-	ElsIf Type = Nodes.GotoStmt Then
-		VisitGotoStmt(Stmt);
-	ElsIf Type = Nodes.LabelStmt Then
-		VisitLabelStmt(Stmt);
-	ElsIf Type = Nodes.PrepRegionInst
-		Or Type = Nodes.PrepEndRegionInst
-		Or Type = Nodes.PrepIfInst
-		Or Type = Nodes.PrepElsIfInst
-		Or Type = Nodes.PrepElseInst
-		Or Type = Nodes.PrepEndIfInst Then
-		VisitPrepInst(Stmt);
-	EndIf;
-	For Each Hook In Visitor_Hooks.AfterVisitStmt Do
-		Hook.AfterVisitStmt(Stmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitStmt()
+Процедура ПосетитьИнструкцию(Инструкция)
+	Перем Тип, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкцию Цикл
+		Подписка.ПосетитьИнструкцию(Инструкция, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Тип = Инструкция.Тип;
+	Если Тип = Узлы.ИнструкцияПрисваивания Тогда
+		ПосетитьИнструкциюПрисваивания(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияВозврат Тогда
+		ПосетитьИнструкциюВозврат(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПрервать Тогда
+		ПосетитьИнструкциюПрервать(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПродолжить Тогда
+		ПосетитьИнструкциюПродолжить(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияВызватьИсключение Тогда
+		ПосетитьИнструкциюВызватьИсключение(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияВыполнить Тогда
+		ПосетитьИнструкциюВыполнить(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияВызвать Тогда
+		ПосетитьИнструкциюВызвать(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияЕсли Тогда
+		ПосетитьИнструкциюЕсли(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПока Тогда
+		ПосетитьИнструкциюПока(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияДля Тогда
+		ПосетитьИнструкциюДля(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияДляКаждого Тогда
+		ПосетитьИнструкциюДляКаждого(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПопытка Тогда
+		ПосетитьИнструкциюПопытка(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПерейти Тогда
+		ПосетитьИнструкциюПерейти(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияМетка Тогда
+		ПосетитьИнструкциюМетка(Инструкция);
+	ИначеЕсли Тип = Узлы.ИнструкцияПрепроцессораОбласть
+		Или Тип = Узлы.ИнструкцияПрепроцессораКонецОбласти
+		Или Тип = Узлы.ИнструкцияПрепроцессораЕсли
+		Или Тип = Узлы.ИнструкцияПрепроцессораИначеЕсли
+		Или Тип = Узлы.ИнструкцияПрепроцессораИначе
+		Или Тип = Узлы.ИнструкцияПрепроцессораКонецЕсли Тогда
+		ПосетитьИнструкциюПрепроцессора(Инструкция);
+	КонецЕсли;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкции Цикл
+		Подписка.ПослеПосещенияИнструкции(Инструкция, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкцию()
 
-Procedure VisitAssignStmt(AssignStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitAssignStmt Do
-		Hook.VisitAssignStmt(AssignStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(AssignStmt);
-	VisitIdentExpr(AssignStmt.Left);
-	VisitExpr(AssignStmt.Right);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitAssignStmt Do
-		Hook.AfterVisitAssignStmt(AssignStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitAssignStmt()
+Процедура ПосетитьИнструкциюПрисваивания(ИнструкцияПрисваивания)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПрисваивания Цикл
+		Подписка.ПосетитьИнструкциюПрисваивания(ИнструкцияПрисваивания, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияПрисваивания);
+	ПосетитьВыражениеИдентификатор(ИнструкцияПрисваивания.Левый);
+	ПосетитьВыражение(ИнструкцияПрисваивания.Правый);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПрисваивания Цикл
+		Подписка.ПослеПосещенияИнструкцииПрисваивания(ИнструкцияПрисваивания, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПрисваивания()
 
-Procedure VisitReturnStmt(ReturnStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitReturnStmt Do
-		Hook.VisitReturnStmt(ReturnStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ReturnStmt);
-	If ReturnStmt.Expr <> Undefined Then
-		VisitExpr(ReturnStmt.Expr);
-	EndIf;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitReturnStmt Do
-		Hook.AfterVisitReturnStmt(ReturnStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitReturnStmt()
+Процедура ПосетитьИнструкциюВозврат(ИнструкцияВозврат)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюВозврат Цикл
+		Подписка.ПосетитьИнструкциюВозврат(ИнструкцияВозврат, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияВозврат);
+	Если ИнструкцияВозврат.Выражение <> Неопределено Тогда
+		ПосетитьВыражение(ИнструкцияВозврат.Выражение);
+	КонецЕсли;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииВозврат Цикл
+		Подписка.ПослеПосещенияИнструкцииВозврат(ИнструкцияВозврат, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюВозврат()
 
-Procedure VisitBreakStmt(BreakStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitBreakStmt Do
-		Hook.VisitBreakStmt(BreakStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitBreakStmt Do
-		Hook.AfterVisitBreakStmt(BreakStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitBreakStmt()
+Процедура ПосетитьИнструкциюПрервать(ИнструкцияПрервать)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПрервать Цикл
+		Подписка.ПосетитьИнструкциюПрервать(ИнструкцияПрервать, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПрервать Цикл
+		Подписка.ПослеПосещенияИнструкцииПрервать(ИнструкцияПрервать, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПрервать()
 
-Procedure VisitContinueStmt(ContinueStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitContinueStmt Do
-		Hook.VisitContinueStmt(ContinueStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitContinueStmt Do
-		Hook.AfterVisitContinueStmt(ContinueStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitContinueStmt()
+Процедура ПосетитьИнструкциюПродолжить(ИнструкцияПродолжить)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПродолжить Цикл
+		Подписка.ПосетитьИнструкциюПродолжить(ИнструкцияПродолжить, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПродолжить Цикл
+		Подписка.ПослеПосещенияИнструкцииПродолжить(ИнструкцияПродолжить, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПродолжить()
 
-Procedure VisitRaiseStmt(RaiseStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitRaiseStmt Do
-		Hook.VisitRaiseStmt(RaiseStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(RaiseStmt);
-	If RaiseStmt.Expr <> Undefined Then
-		VisitExpr(RaiseStmt.Expr);
-	EndIf;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitRaiseStmt Do
-		Hook.AfterVisitRaiseStmt(RaiseStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitRaiseStmt()
+Процедура ПосетитьИнструкциюВызватьИсключение(ИнструкцияВызватьИсключение)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюВызватьИсключение Цикл
+		Подписка.ПосетитьИнструкциюВызватьИсключение(ИнструкцияВызватьИсключение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияВызватьИсключение);
+	Если ИнструкцияВызватьИсключение.Выражение <> Неопределено Тогда
+		ПосетитьВыражение(ИнструкцияВызватьИсключение.Выражение);
+	КонецЕсли;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииВызватьИсключение Цикл
+		Подписка.ПослеПосещенияИнструкцииВызватьИсключение(ИнструкцияВызватьИсключение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюВызватьИсключение()
 
-Procedure VisitExecuteStmt(ExecuteStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitExecuteStmt Do
-		Hook.VisitExecuteStmt(ExecuteStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ExecuteStmt);
-	VisitExpr(ExecuteStmt.Expr);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitExecuteStmt Do
-		Hook.AfterVisitExecuteStmt(ExecuteStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitExecuteStmt()
+Процедура ПосетитьИнструкциюВыполнить(ИнструкцияВыполнить)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюВыполнить Цикл
+		Подписка.ПосетитьИнструкциюВыполнить(ИнструкцияВыполнить, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияВыполнить);
+	ПосетитьВыражение(ИнструкцияВыполнить.Выражение);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииВыполнить Цикл
+		Подписка.ПослеПосещенияИнструкцииВыполнить(ИнструкцияВыполнить, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюВыполнить()
 
-Procedure VisitCallStmt(CallStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitCallStmt Do
-		Hook.VisitCallStmt(CallStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(CallStmt);
-	VisitIdentExpr(CallStmt.Ident);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitCallStmt Do
-		Hook.AfterVisitCallStmt(CallStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitCallStmt()
+Процедура ПосетитьИнструкциюВызвать(ИнструкцияВызвать)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюВызвать Цикл
+		Подписка.ПосетитьИнструкциюВызвать(ИнструкцияВызвать, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияВызвать);
+	ПосетитьВыражениеИдентификатор(ИнструкцияВызвать.Идентификатор);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииВызвать Цикл
+		Подписка.ПослеПосещенияИнструкцииВызвать(ИнструкцияВызвать, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюВызвать()
 
-Procedure VisitIfStmt(IfStmt)
-	Var ElsIfStmt, Hook;
-	For Each Hook In Visitor_Hooks.VisitIfStmt Do
-		Hook.VisitIfStmt(IfStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(IfStmt);
-	VisitExpr(IfStmt.Cond);
-	VisitStatements(IfStmt.Then);
-	If IfStmt.ElsIf <> Undefined Then
-		For Each ElsIfStmt In IfStmt.ElsIf Do
-			VisitElsIfStmt(ElsIfStmt);
-		EndDo;
-	EndIf;
-	If IfStmt.Else <> Undefined Then
-		VisitElseStmt(IfStmt.Else);
-	EndIf;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitIfStmt Do
-		Hook.AfterVisitIfStmt(IfStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitIfStmt()
+Процедура ПосетитьИнструкциюЕсли(ИнструкцияЕсли)
+	Перем ИнструкцияИначеЕсли, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюЕсли Цикл
+		Подписка.ПосетитьИнструкциюЕсли(ИнструкцияЕсли, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияЕсли);
+	ПосетитьВыражение(ИнструкцияЕсли.Условие);
+	ПосетитьИнструкции(ИнструкцияЕсли.Тогда);
+	Если ИнструкцияЕсли.ИначеЕсли <> Неопределено Тогда
+		Для Каждого ИнструкцияИначеЕсли Из ИнструкцияЕсли.ИначеЕсли Цикл
+			ПосетитьИнструкциюИначеЕсли(ИнструкцияИначеЕсли);
+		КонецЦикла;
+	КонецЕсли;
+	Если ИнструкцияЕсли.Иначе <> Неопределено Тогда
+		ПосетитьИнструкциюИначе(ИнструкцияЕсли.Иначе);
+	КонецЕсли;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииЕсли Цикл
+		Подписка.ПослеПосещенияИнструкцииЕсли(ИнструкцияЕсли, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюЕсли()
 
-Procedure VisitElsIfStmt(ElsIfStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitElsIfStmt Do
-		Hook.VisitElsIfStmt(ElsIfStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ElsIfStmt);
-	VisitExpr(ElsIfStmt.Cond);
-	VisitStatements(ElsIfStmt.Then);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitElsIfStmt Do
-		Hook.AfterVisitElsIfStmt(ElsIfStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitElsIfStmt()
+Процедура ПосетитьИнструкциюИначеЕсли(ИнструкцияИначеЕсли)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюИначеЕсли Цикл
+		Подписка.ПосетитьИнструкциюИначеЕсли(ИнструкцияИначеЕсли, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияИначеЕсли);
+	ПосетитьВыражение(ИнструкцияИначеЕсли.Условие);
+	ПосетитьИнструкции(ИнструкцияИначеЕсли.Тогда);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииИначеЕсли Цикл
+		Подписка.ПослеПосещенияИнструкцииИначеЕсли(ИнструкцияИначеЕсли, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюИначеЕсли()
 
-Procedure VisitElseStmt(ElseStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitElseStmt Do
-		Hook.VisitElseStmt(ElseStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ElseStmt);
-	VisitStatements(ElseStmt.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitElseStmt Do
-		Hook.AfterVisitElseStmt(ElseStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitElseStmt()
+Процедура ПосетитьИнструкциюИначе(ИнструкцияИначе)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюИначе Цикл
+		Подписка.ПосетитьИнструкциюИначе(ИнструкцияИначе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияИначе);
+	ПосетитьИнструкции(ИнструкцияИначе.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииИначе Цикл
+		Подписка.ПослеПосещенияИнструкцииИначе(ИнструкцияИначе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюИначе()
 
-Procedure VisitWhileStmt(WhileStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitWhileStmt Do
-		Hook.VisitWhileStmt(WhileStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(WhileStmt);
-	VisitExpr(WhileStmt.Cond);
-	VisitStatements(WhileStmt.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitWhileStmt Do
-		Hook.AfterVisitWhileStmt(WhileStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitWhileStmt()
+Процедура ПосетитьИнструкциюПока(ИнструкцияПока)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПока Цикл
+		Подписка.ПосетитьИнструкциюПока(ИнструкцияПока, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияПока);
+	ПосетитьВыражение(ИнструкцияПока.Условие);
+	ПосетитьИнструкции(ИнструкцияПока.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПока Цикл
+		Подписка.ПослеПосещенияИнструкцииПока(ИнструкцияПока, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПока()
 
-Procedure VisitForStmt(ForStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitForStmt Do
-		Hook.VisitForStmt(ForStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ForStmt);
-	VisitIdentExpr(ForStmt.Ident);
-	VisitExpr(ForStmt.From);
-	VisitExpr(ForStmt.To);
-	VisitStatements(ForStmt.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitForStmt Do
-		Hook.AfterVisitForStmt(ForStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitForStmt()
+Процедура ПосетитьИнструкциюДля(ИнструкцияДля)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюДля Цикл
+		Подписка.ПосетитьИнструкциюДля(ИнструкцияДля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияДля);
+	ПосетитьВыражениеИдентификатор(ИнструкцияДля.Идентификатор);
+	ПосетитьВыражение(ИнструкцияДля.НачинаяС);
+	ПосетитьВыражение(ИнструкцияДля.По);
+	ПосетитьИнструкции(ИнструкцияДля.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииДля Цикл
+		Подписка.ПослеПосещенияИнструкцииДля(ИнструкцияДля, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюДля()
 
-Procedure VisitForEachStmt(ForEachStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitForEachStmt Do
-		Hook.VisitForEachStmt(ForEachStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ForEachStmt);
-	VisitIdentExpr(ForEachStmt.Ident);
-	VisitExpr(ForEachStmt.In);
-	VisitStatements(ForEachStmt.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitForEachStmt Do
-		Hook.AfterVisitForEachStmt(ForEachStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitForEachStmt()
+Процедура ПосетитьИнструкциюДляКаждого(ИнструкцияДляКаждого)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюДляКаждого Цикл
+		Подписка.ПосетитьИнструкциюДляКаждого(ИнструкцияДляКаждого, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияДляКаждого);
+	ПосетитьВыражениеИдентификатор(ИнструкцияДляКаждого.Идентификатор);
+	ПосетитьВыражение(ИнструкцияДляКаждого.Из);
+	ПосетитьИнструкции(ИнструкцияДляКаждого.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииДляКаждого Цикл
+		Подписка.ПослеПосещенияИнструкцииДляКаждого(ИнструкцияДляКаждого, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюДляКаждого()
 
-Procedure VisitTryStmt(TryStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitTryStmt Do
-		Hook.VisitTryStmt(TryStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(TryStmt);
-	VisitStatements(TryStmt.Try);
-	VisitExceptStmt(TryStmt.Except);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitTryStmt Do
-		Hook.AfterVisitTryStmt(TryStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitTryStmt()
+Процедура ПосетитьИнструкциюПопытка(ИнструкцияПопытка)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПопытка Цикл
+		Подписка.ПосетитьИнструкциюПопытка(ИнструкцияПопытка, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияПопытка);
+	ПосетитьИнструкции(ИнструкцияПопытка.Попытка);
+	ПосетитьИнструкциюИсключение(ИнструкцияПопытка.Исключение);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПопытка Цикл
+		Подписка.ПослеПосещенияИнструкцииПопытка(ИнструкцияПопытка, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПопытка()
 
-Procedure VisitExceptStmt(ExceptStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitExceptStmt Do
-		Hook.VisitExceptStmt(ExceptStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(ExceptStmt);
-	VisitStatements(ExceptStmt.Body);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitExceptStmt Do
-		Hook.AfterVisitExceptStmt(ExceptStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitExceptStmt()
+Процедура ПосетитьИнструкциюИсключение(ИнструкцияИсключение)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюИсключение Цикл
+		Подписка.ПосетитьИнструкциюИсключение(ИнструкцияИсключение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияИсключение);
+	ПосетитьИнструкции(ИнструкцияИсключение.Инструкции);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииИсключение Цикл
+		Подписка.ПослеПосещенияИнструкцииИсключение(ИнструкцияИсключение, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюИсключение()
 
-Procedure VisitGotoStmt(GotoStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitGotoStmt Do
-		Hook.VisitGotoStmt(GotoStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitGotoStmt Do
-		Hook.AfterVisitGotoStmt(GotoStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitGotoStmt()
+Процедура ПосетитьИнструкциюПерейти(ИнструкцияПерейти)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПерейти Цикл
+		Подписка.ПосетитьИнструкциюПерейти(ИнструкцияПерейти, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПерейти Цикл
+		Подписка.ПослеПосещенияИнструкцииПерейти(ИнструкцияПерейти, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПерейти()
 
-Procedure VisitLabelStmt(LabelStmt)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitLabelStmt Do
-		Hook.VisitLabelStmt(LabelStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitLabelStmt Do
-		Hook.AfterVisitLabelStmt(LabelStmt, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitLabelStmt()
+Процедура ПосетитьИнструкциюМетка(ИнструкцияМетка)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюМетка Цикл
+		Подписка.ПосетитьИнструкциюМетка(ИнструкцияМетка, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииМетка Цикл
+		Подписка.ПослеПосещенияИнструкцииМетка(ИнструкцияМетка, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюМетка()
 
-#EndRegion // VisitStmt
+#КонецОбласти // ПосещениеИнструкций
 
-#Region VisitPrep
+#Область ПосещениеПрепроцессора
 
-Procedure VisitPrepExpr(PrepExpr)
-	Var Type, Hook;
-	For Each Hook In Visitor_Hooks.VisitPrepExpr Do
-		Hook.VisitPrepExpr(PrepExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	Type = PrepExpr.Type;
-	If Type = Nodes.PrepSymExpr Then
-		VisitPrepSymExpr(PrepExpr);
-	ElsIf Type = Nodes.PrepBinaryExpr Then
-		VisitPrepBinaryExpr(PrepExpr);
-	ElsIf Type = Nodes.PrepNotExpr Then
-		VisitPrepNotExpr(PrepExpr);
-	EndIf;
-	For Each Hook In Visitor_Hooks.AfterVisitPrepExpr Do
-		Hook.AfterVisitPrepExpr(PrepExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitPrepExpr()
+Процедура ПосетитьВыражениеПрепроцессора(ВыражениеПрепроцессора)
+	Перем Тип, Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеПрепроцессора Цикл
+		Подписка.ПосетитьВыражениеПрепроцессора(ВыражениеПрепроцессора, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Тип = ВыражениеПрепроцессора.Тип;
+	Если Тип = Узлы.ВыражениеПрепроцессораСимвол Тогда
+		ПосетитьВыражениеПрепроцессораСимвол(ВыражениеПрепроцессора);
+	ИначеЕсли Тип = Узлы.ВыражениеПрепроцессораБинарное Тогда
+		ПосетитьВыражениеПрепроцессораБинарное(ВыражениеПрепроцессора);
+	ИначеЕсли Тип = Узлы.ВыражениеПрепроцессораНе Тогда
+		ПосетитьВыражениеПрепроцессораНе(ВыражениеПрепроцессора);
+	КонецЕсли;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияПрепроцессора Цикл
+		Подписка.ПослеПосещенияВыраженияПрепроцессора(ВыражениеПрепроцессора, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеПрепроцессора()
 
-Procedure VisitPrepSymExpr(PrepSymExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitPrepSymExpr Do
-		Hook.VisitPrepSymExpr(PrepSymExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	For Each Hook In Visitor_Hooks.AfterVisitPrepSymExpr Do
-		Hook.AfterVisitPrepSymExpr(PrepSymExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitPrepSymExpr()
+Процедура ПосетитьВыражениеПрепроцессораСимвол(ВыражениеПрепроцессораСимвол)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеПрепроцессораСимвол Цикл
+		Подписка.ПосетитьВыражениеПрепроцессораСимвол(ВыражениеПрепроцессораСимвол, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияПрепроцессораСимвол Цикл
+		Подписка.ПослеПосещенияВыраженияПрепроцессораСимвол(ВыражениеПрепроцессораСимвол, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеПрепроцессораСимвол()
 
-Procedure VisitPrepBinaryExpr(PrepBinaryExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitPrepBinaryExpr Do
-		Hook.VisitPrepBinaryExpr(PrepBinaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(PrepBinaryExpr);
-	VisitPrepExpr(PrepBinaryExpr.Left);
-	VisitPrepExpr(PrepBinaryExpr.Right);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitPrepBinaryExpr Do
-		Hook.AfterVisitPrepBinaryExpr(PrepBinaryExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitPrepBinaryExpr()
+Процедура ПосетитьВыражениеПрепроцессораБинарное(ВыражениеПрепроцессораБинарное)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеПрепроцессораБинарное Цикл
+		Подписка.ПосетитьВыражениеПрепроцессораБинарное(ВыражениеПрепроцессораБинарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеПрепроцессораБинарное);
+	ПосетитьВыражениеПрепроцессора(ВыражениеПрепроцессораБинарное.Левый);
+	ПосетитьВыражениеПрепроцессора(ВыражениеПрепроцессораБинарное.Правый);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияПрепроцессораБинарное Цикл
+		Подписка.ПослеПосещенияВыраженияПрепроцессораБинарное(ВыражениеПрепроцессораБинарное, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеПрепроцессораБинарное()
 
-Procedure VisitPrepNotExpr(PrepNotExpr)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitPrepNotExpr Do
-		Hook.VisitPrepNotExpr(PrepNotExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(PrepNotExpr);
-	VisitPrepExpr(PrepNotExpr.Expr);
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitPrepNotExpr Do
-		Hook.AfterVisitPrepNotExpr(PrepNotExpr, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitPrepNotExpr()
+Процедура ПосетитьВыражениеПрепроцессораНе(ВыражениеПрепроцессораНе)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьВыражениеПрепроцессораНе Цикл
+		Подписка.ПосетитьВыражениеПрепроцессораНе(ВыражениеПрепроцессораНе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ВыражениеПрепроцессораНе);
+	ПосетитьВыражениеПрепроцессора(ВыражениеПрепроцессораНе.Выражение);
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияВыраженияПрепроцессораНе Цикл
+		Подписка.ПослеПосещенияВыраженияПрепроцессораНе(ВыражениеПрепроцессораНе, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьВыражениеПрепроцессораНе()
 
-Procedure VisitPrepInst(PrepInst)
-	Var Hook;
-	For Each Hook In Visitor_Hooks.VisitPrepInst Do
-		Hook.VisitPrepInst(PrepInst, Visitor_Stack, Visitor_Counters);
-	EndDo;
-	PushInfo(PrepInst);
-	If PrepInst.Property("Cond") Then
-		VisitPrepExpr(PrepInst.Cond);
-	EndIf;
-	PopInfo();
-	For Each Hook In Visitor_Hooks.AfterVisitPrepInst Do
-		Hook.AfterVisitPrepInst(PrepInst, Visitor_Stack, Visitor_Counters);
-	EndDo;
-EndProcedure // VisitPrepInst()
+Процедура ПосетитьИнструкциюПрепроцессора(ИнструкцияПрепроцессора)
+	Перем Подписка;
+	Для Каждого Подписка Из Посетитель_Подписки.ПосетитьИнструкциюПрепроцессора Цикл
+		Подписка.ПосетитьИнструкциюПрепроцессора(ИнструкцияПрепроцессора, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+	ЗакинутьИнформациюНаСтек(ИнструкцияПрепроцессора);
+	Если ИнструкцияПрепроцессора.Свойство("Условие") Тогда
+		ПосетитьВыражениеПрепроцессора(ИнструкцияПрепроцессора.Условие);
+	КонецЕсли;
+	СнятьИнформациюСоСтека();
+	Для Каждого Подписка Из Посетитель_Подписки.ПослеПосещенияИнструкцииПрепроцессора Цикл
+		Подписка.ПослеПосещенияИнструкцииПрепроцессора(ИнструкцияПрепроцессора, Посетитель_Стек, Посетитель_Счетчики);
+	КонецЦикла;
+КонецПроцедуры // ПосетитьИнструкциюПрепроцессора()
 
-#EndRegion // VisitPrep
+#КонецОбласти // ПосещениеПрепроцессора
 
-#EndRegion // Visitor
+#КонецОбласти // Посетитель
 
-Init();
+Инициализировать();
