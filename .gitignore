@@ -2,3 +2,11 @@
 temp/*
 build/*
 log.txt
+
+bdd-log.xml
+
+*.ospx
+tests.xml
+coverage/*
+
+tests-reports/*
