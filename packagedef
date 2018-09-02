@@ -1,0 +1,17 @@
+
+ИмяПродукта = НРег("bsl");
+
+Описание.Имя(ИмяПродукта)
+		.Версия("1.0.0")
+		.ВерсияСреды("1.0.20")
+		.ЗависитОт("logos", "1.1.1")
+		.ВключитьФайл("src")
+		.ВключитьФайл("plugins")
+		.ВключитьФайл("docs")
+		.ВключитьФайл("README.md")
+		.ОпределяетКласс("BSLПарсер", "src/BSLParser/Ext/ObjectModule.bsl")
+		.ОпределяетКласс("ПлагинГенерацииКодаПоAST", "src/plugins/BSL/Ext/ObjectModule.bsl")
+		.ОпределяетКласс("ПлагинПроверкиАвтоПеременных", "src/plugins/AutoVarsCheck/Ext/ObjectModule.bsl")
+		.ОпределяетКласс("ПлагинГенерацииДокументации", "src/plugins/DocGen/Ext/ObjectModule.bsl")
+		.ОпределяетКласс("ПлагинПроверкиИнструкцииВозвратФункции", "src/plugins/ReturnCheck/Ext/ObjectModule.bsl")
+		.ОпределяетКласс("ПлагинТестПеременных", "src/plugins/TestVars/Ext/ObjectModule.bsl")
